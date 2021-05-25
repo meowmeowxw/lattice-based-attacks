@@ -21,7 +21,10 @@
 \usepackage[english]{babel}
 
 \newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{property}{Property}[section]
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
 \newcommand{\dd}{\cdot}
 
 \title{Introduction to LLL\\``Cryptography''}
@@ -74,7 +77,7 @@ is to have $a_1 = a_2 = \cdots = a_k = 0$.
     \textbf{Bases}
 \end{definition}
 
-Taken a set of linearly independent vectors $x = (v_1,\ldots,v_n) \in V$ we say that $x$ is a \texttt{basis} of $V$ if $\forall w \in V$ we can write
+Taken a set of linearly independent vectors $b = (v_1,\ldots,v_n) \in V$ we say that $b$ is a \texttt{basis} of $V$ if $\forall w \in V$ we can write
 
 \begin{center}
     $w = a_1v_1 + a_2v_2 + \cdots + a_nv_n$
@@ -125,7 +128,40 @@ An \texttt{ortoghonal basis} for a vector space $V$ is a basis $v_1, \ldots, v_m
     $v_i \dd v_j = 0$ for all $i \neq j$
 \end{center}
 
+If $\lVert v_i \rVert = 1$ for all $i$ then the basis is \texttt{orthonormal}.
+
+\begin{theorem}
+    \textbf{Gram-Schmidt Algorithm}
+\end{theorem}
+
+Let $b = (v_1, \ldots, v_n)$, be a basis for a vector space $V \subset \R^m$. There is an algorithm to create an orthogonal basis
+$b^* = (v_1^*,\ldots,v_n^*)$.
+The two bases have the property that Span$\{v_1,\ldots,v_i\}$ = Span$\{v_1^*,\ldots,v_i^*\}$ for all $i = 1,2,\ldots,n$
+
 \section{Lattices}
+
+\begin{definition}
+    \textbf{Lattice}
+\end{definition}
+
+Let $v_1,\ldots,v_n \in \R^m, m \ge n$ be linearly independent vectors. A \texttt{Lattice} $L$ spanned by $\{v_1,\ldots,n_n\}$ is the set of 
+all integer linear combinations of $v_1,\ldots,v_n$.
+
+\begin{center}
+    $L = \bigg\{\sum_{i=1}^{n} a_iv_i, a_i \in \Z \bigg\}$
+\end{center}
+
+If $v_i$ for every $i = 1,\ldots\,n$ has integer coordinates then the lattice is
+called \texttt{Integral Lattice}.
+
+On the figure \ref{fig:lattice1} we show a lattice $L$ with bases $v=(3, 1)$ and $w=(-1, 1)$:
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.7\textwidth]{./img/lattice.png}
+    \caption{Lattice spanned by $v, w$}
+    \label{fig:lattice1}
+\end{figure}
 
 \chapter{LLL}
 
