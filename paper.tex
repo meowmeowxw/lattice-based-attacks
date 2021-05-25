@@ -141,7 +141,7 @@ The two bases have the property that Span$\{v_1,\ldots,v_i\}$ = Span$\{v_1^*,\ld
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/gram_schmidt.png}
-    \caption{}
+    \caption{Gram Schmidt orthogonalization}
     \label{fig:gram_schmidt}
 \end{figure}
 
@@ -163,15 +163,28 @@ all integer linear combinations of $v_1,\ldots,v_n$.
 If $v_i$ for every $i = 1,\ldots\,n$ has integer coordinates then the lattice is
 called \texttt{Integral Lattice}.
 
-On the figure \ref{fig:lattice1} we show a lattice $L$ with bases $v=(3, 1)$ and $w=(-1, 1)$:
+On the figure \ref{fig:lattice0} we show a lattice $L$ with bases $v=(3, 1)$ and $w=(-1, 1)$, and on \ref{fig:lattice1} the same lattice $L$ with
+a different basis.
 
-\begin{figure}[!b]
-    \centering
-    \includegraphics[width=0.7\textwidth]{./img/lattice.png}
-    \caption{Lattice spanned by $v, w$}
-    \label{fig:lattice1}
+\begin{figure}[!tbp]
+    \begin{minipage}[b]{0.50\textwidth}
+        \includegraphics[width=\textwidth]{./img/lattice_b0.png}
+        \caption{Lattice $L$ of $v, w$}
+        \label{fig:lattice0}
+    \end{minipage}
+    \hspace{\fill}
+    \hspace{\fill}
+    \hspace{\fill}
+    \hspace{\fill}
+    \hspace{\fill}
+    \begin{minipage}[b]{0.50\textwidth}
+        \includegraphics[width=\textwidth]{./img/lattice_b1.png}
+        \caption{Lattice $L$ of $v', w'$}
+        \label{fig:lattice1}
+    \end{minipage}
 \end{figure}
 
+% matrix([[0, 0, 1], [1, 1, 2], [1, 2, 1]])
 \chapter{LLL}
 
 \section{Purpose}
