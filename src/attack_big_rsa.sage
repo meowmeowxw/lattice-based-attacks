@@ -12,22 +12,30 @@ def print_f(f):
         print(f"{hex(x)}x^{len(fl) -2 - i}", end=" + ")
     print(f"{hex(f[0])}", end="\n")
 
+while True:
+    p = random_prime(2^512 - 1, false, 2^511)
+    q = random_prime(2^512 - 1, false, 2^511)
+    phi = (p - 1) * (q - 1)
+    e = 3
+    if gcd(e, phi) == 1:
+        break
 
-n =  0xf046522fb555a90bdc558fc93
+n =  p * q
 N = Zmod(n)
-e = 3
-pad = int.from_bytes(b"this key:", "big")
-m = 0x6162
-z = (pad << 16) | m
+m = b"lattice_key"
+lm = len(m)
+m = int.from_bytes(m, "big")
+pad = int.from_bytes(b"\x01" * (len(hex(n)[2:]) // 2 - lm - 1), "big")
+z = (pad << (lm * 8)) | m
 c = N(z) ^ e
-a = pad << 16
-X = pow(2, 16)
+a = (pad << (lm * 8))
+X = 2 ^ lm
 
 print(f"n:    {hex(n)}\ne:    {hex(e)}\npad:  {hex(pad)}\nc:    {hex(c)}\na:    {hex(a)}\nX:    {hex(X)}")
+print(f"n bit_length: {int(n).bit_length()}")
 P.<x> = PolynomialRing(N)
 f = (a + x)^e - c
 print(f"f:   ", end=" ")
-print(f)
 print_f(f)
 fi = list(map(int, f.list()))
 
@@ -66,7 +74,7 @@ print_f(g)
 
 for r in g.roots():
     if r[0] == m:
-        print(f"\n[*] found: {hex(r[0])}")
+        print(f"\n[*] found: {bytes.fromhex(hex(r[0])[2:])}")
         break
 else:
     print("[!] failed")

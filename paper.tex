@@ -393,15 +393,15 @@ We have a 100-bit \textbf{RSA} modulus
 Before the encryption the message $m$ is padded as
 
 \[
-    z = pad || m = 0x74686973206b65793a00 || m
+    z = pad || m = 0x74686973206b65793a || m
 \]
 
-where $||$ is the concatenation.\\
+where $||$ is the concatenation. The padding is the ascii encoding of ``this key:''\\
 
 The ciphertext is
 
 \[
-    c = z^e \mod N = 0x8185d7de1d7cb8801e69c0bf
+    c = z^e \mod N = 0x5b603cda4b72100c6f25954fc
 \]
 
 Suppose that we don't know the factorization of $N$ and we would like to know the message $m$.
@@ -423,8 +423,8 @@ Thus we have that $c = (a + m)^3 \mod N$, for an unkown small $m$.
 We can define $f(x) = (a + x)^3 - c$, and so we setup the problem to find a small root $m$ such that $f(m) \equiv 0 \mod N$
 
 \begin{align*}
-    f(x) = x^3 + 0x15d393c596142306bae000000x^2 + 0x969acdb25c5f7b5ff7f29bc59x \\
-    + 0x75abf10edc37c4b90c5897322
+    f(x) = x^3 + 0x15d393c596142306bae0000x^2 + 0x1b53c5e184a49b39f9ad9eedbx\\
+    + 0x486a5d936fb568185c8ff0506
 \end{align*}
 
 \vspace*{10px}
@@ -452,8 +452,8 @@ integer linear combination of the vector of the lattice will keep the bound $X^i
 
 \[
     \begin{split}
-    v = (0x24409ad85f781X^3, -0xd75ab858b980X^2, \\
-        0x1973847f4ddb8X, -0x9a2d87b43d)
+    v = (0x90843131bc53X^3 + 0x2736f60b1c7ba3294X^2, \\
+    -0x1bec331b20625341b6d73X, 0x47336b98335c143ac912ec9e)
     \end{split}
 \]
 
@@ -461,8 +461,8 @@ We can construct the polynomial $g$ using the coefficients of $v$
 
 \[
     \begin{split}
-        g(x) = 0x24409ad85f781x^3  - 0xd75ab858b980x^2 \\ 
-        + 0x1973847f4ddb8x - 0x9a2d87b43d
+        g(x) = 0x90843131bc53x^3 + 0x2736f60b1c7ba3294x^2 \\
+        -0x1bec331b20625341b6d73x + 0x47336b98335c143ac912ec9e
     \end{split}
 \]
 
@@ -490,10 +490,18 @@ If we ignore the $1.02^n$ factor, then we need to satisfy that
 We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < N$, if we solves for $X$ this will be satisfied when $X < N^{\frac{1}{6}}$.
 In this case we have $N = 100$-bit number and $X = 2^{16}$, so $N^{\frac{1}{6}} > X$ and we have verified the correctness.\\
 
-If we compute the root of $g(x)$ over the integers we obtain $m = 0x61$ which is the correct result.\\
+If we compute the root of $g(x)$ over the integers we obtain $m = 0x6162$ which is the correct result.\\
+
+This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the same construction will work if we want to find
+
+\begin{itemize}
+    \item \textasciitilde 170 unkown bits of message from an RSA 1024-bit modulus
+    \item \textasciitilde 341 unkown bits of message from an RSA 2048-bit modulus
+    \item \textasciitilde 683 unkown bits of message from an RSA 4096-bit modulus
+\end{itemize}
 
 If you want to find bigger root you need to create a bigger lattice with more polynomials generated with \ref{eq:create_pol},
-this method is better described in TODO.
+this method is better described in TODO, but the principles are the same.
 
 \section{Key recovery ECDSA}
 
