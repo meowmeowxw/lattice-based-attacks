@@ -4,12 +4,16 @@ import itertools as it
 import tempfile
 import os
 
-v1 = vector([10, 4])
+v1 = vector([8, 4])
 v2 = vector([7, 5])
 
 pts = []
-for i, j in it.product([-4 + i for i in range(17)], [-4 + i for i in range(14)]):
-    pts.append((i, j))
+for i, j in it.product([-10 + i for i in range(27)], [-10 + i for i in range(27)]):
+    pt = i*v1 + j*v2
+    x, y = pt[0], pt[1]
+    if x < -5 or x > 17 or y < -5 or y > 17:
+        continue
+    pts.append(pt)
 
 p =  plot(v1, color="blue", legend_label="v1", legend_color="blue")
 p += plot(v2, color="purple", legend_label="v2", legend_color="purple")
