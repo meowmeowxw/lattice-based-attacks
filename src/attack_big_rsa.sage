@@ -29,7 +29,7 @@ pad = int.from_bytes(b"\x01" * (len(hex(n)[2:]) // 2 - lm - 1), "big")
 z = (pad << (lm * 8)) | m
 c = N(z) ^ e
 a = (pad << (lm * 8))
-X = 2 ^ lm
+X = 2 ^ (lm * 8)
 
 print(f"n:    {hex(n)}\ne:    {hex(e)}\npad:  {hex(pad)}\nc:    {hex(c)}\na:    {hex(a)}\nX:    {hex(X)}")
 print(f"n bit_length: {int(n).bit_length()}")
