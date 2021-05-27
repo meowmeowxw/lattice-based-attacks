@@ -292,11 +292,157 @@ There are many applications of LLL
     \item Application in cryptanalysis.
 \end{enumerate}
 
-\chapter{Applications}
+\chapter{Cryptanlysis}
 
-\section{Attack Knapsack}
+% \section{Attack Knapsack}
 
-\section{Attack RSA}
+\section{RSA introduction}
+
+\textbf{RSA} is one of the earliest and most used asymmetric cryptosystem.
+The usual step to generate a public/private key for \textbf{RSA} is the following
+
+\begin{enumerate}
+    \item Fix $e = 65537$ or $e = 3$ (public).
+    \item Find two primes $p, q$ such that $p - 1$ and $q - 1$ are relatively prime to $e$, i.e. gcd$(e, p-1) = 1$ and gcd$(e, q-1) = 1$.
+    \item Compute $N = p * q$ and $\phi(n) = (p-1) * (q-1)$
+    \item Calculate $d$ (private) as the multiplicative inverse of $e$ modulo $\phi(n)$.
+    \item $(N, e)$ is the public key, $(N, d)$ is the private key.
+\end{enumerate}
+
+To encrypt a message $m$ with \textbf{textbook RSA}
+
+\begin{center}
+    $c = m^e \mod N$
+\end{center}
+
+To decrypt a ciphertext $c$
+
+\begin{center}
+    $m = c^d \mod N$
+\end{center}
+
+\section{Lattices against RSA}
+
+It's easy to find the roots of a univariate polynomial over the integers. Finding the roots of \textbf{modular} polynomial is hard, example:
+
+\begin{center}
+    $f(x) \equiv 0 \mod N$
+\end{center}
+
+Suppose $N$ is an \textbf{RSA} modulus and we don't know the factorization of it. Let's have an univariate integer polynomial $f(x)$ with degree $n$
+
+\begin{center}
+    $f(x) = x^n + a_{n-1}x^{n-1} + a_{n-2}x^{n-2} + \cdots + a_1n + a_0$
+\end{center}
+
+Coppersmith showed how we can recover the value $x_0$ such that $f(x_0) \equiv 0 \mod N$, with $x_0 < N^{\frac{1}{n}}$ in polynomial time
+using the following theorem
+
+\begin{theorem}
+    \textbf{Howgrave-Graham}
+\end{theorem}
+
+\textit{Let $g(x)$ be an univariate polynomial with n monomials and $m$ be a positive integer.
+    If we have some restraint $X$ and the following equations hold}
+
+\begin{center}
+    \begin{eqnarray}
+         g(x_0) \equiv 0 \mod N^m, |x_0| \le X \\
+         \lVert g(xX) \rVert < \frac{N}{\sqrt{n}} \label{eq:pol}
+    \end{eqnarray}
+\end{center}
+
+Then $g(x_0) = 0$ holds over the integers.
+
+\subsection{Example}
+
+We have a 100-bit \textbf{RSA} modulus
+
+\begin{center}
+    $N=0xf046522fb555a90bdc558fc93$ and $e = 3$.
+\end{center}
+
+Before the encryption the message $m$ is padded as
+
+\[
+    z = pad || m = 0x74686973206b65793a00 || m
+\]
+
+where $||$ is the concatenation.\\
+
+The ciphertext is
+
+\[
+    c = z^e \mod N = 0x8185d7de1d7cb8801e69c0bf
+\]
+
+Suppose that we don't know the factorization of $N$ and we would like to know the message $m$.
+However we know the padding and the length of $m < 2^{16}$.
+
+\vspace*{10px}
+
+Let's define
+
+\[
+a = 0x74686973206b65793a0000
+.\] 
+
+which is the known padding string.
+
+\vspace*{10px}
+
+Thus we have that $c = (a + m)^3 \mod N$, for an unkown small $m$.
+We can define $f(x) = (a + x)^3 - c$, and so we setup the problem to find a small root $m$ such that $f(m) \equiv 0 \mod N$
+
+\begin{align*}
+    f(x) = x^3 + 0x15d393c596142306bae0000x^2 + 0x1b53c5e184a49b39f9ad9eedbx \\
+    + 0x9bb23cefd94fac9cc9cee9943
+\end{align*}
+
+\vspace*{10px}
+
+\textbf{Lattice contruction}. Let the coefficients of $f$ be $f(x) = x^3 + f_2x^2 + f_1x + f_0$
+and $X = 2^{16}$ be the upper bound of the size of the root $m$. We can construct the matrix
+
+\[
+B = 
+\begin{pmatrix}
+    X^3 & f_2X^2 & f_1X & f_0 \\
+    0 & NX^2 & 0 & 0 \\
+    0 & 0 & NX & 0 \\
+    0 & 0 & 0 & N \\
+\end{pmatrix}
+\] 
+
+If we apply LLL to the lattice we get
+
+\clearpage
+We can use lattices to solves the problem:
+
+\begin{itemize}
+    \item If we have some polynomial which share the same root $x_0$ over $N^m$ we can represent each of them as a row from lattice,
+        and every linear integer combination of rows between them will yield another polynomial having a root $x_0$.
+    \item Using \textbf{LLL} on the lattice we can find a reduced lattice basis, such that the norm of the shortest vector will
+        satisfy the inequality of \ref{eq:pol}. \textbf{LLL} will only use \textbf{linear integer operations} on the basis vectors,
+        in this way we preserve the root $x_0$ and the bound $X$.
+    \item Define the shortest vector in the reduced basis as $v = (v_0, v_1, \ldots, v_n)$. We can construct the polynomial
+        \begin{center}
+            \[
+                g(x) = v_0 + \frac{\displaystyle v_1}{X}x + \frac{v_2}{X^2}x^2 + \cdots + \frac{v_n}{X^n}x^n
+            \]
+        \end{center}
+\end{itemize}
+Since $g(x)$ is on the lattice we know that 
+
+\begin{center}
+    \begin{eqnarray}
+        g(x_0) \equiv 0 \mod N^m \\
+        \vert x_0| \le X \\
+        \lVert g(xX) \rVert < \frac{N^m}{\sqrt{deg(g) + 1}}
+    \end{eqnarray}
+\end{center}
+
+\section{Key recovery ECDSA}
 
 \chapter*{End of Paper}
 
