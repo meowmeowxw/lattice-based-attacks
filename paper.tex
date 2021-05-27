@@ -347,12 +347,40 @@ using the following theorem
 
 \begin{center}
     \begin{eqnarray}
-         g(x_0) \equiv 0 \mod N^m, |x_0| \le X \\
+        g(x_0) \equiv 0 \mod N^m, |x_0| \le X \label{eq:bound} \\
          \lVert g(xX) \rVert < \frac{N}{\sqrt{n}} \label{eq:pol}
     \end{eqnarray}
 \end{center}
 
-Then $g(x_0) = 0$ holds over the integers.
+\textit{Then $g(x_0) = 0$ holds over the integers.}
+
+\vspace*{10px}
+
+This theorem states that is possible to compute the root of $f(x) \mod N$ if we can find a polynomial $g(x)$ that share the same root but modulo $N^m$.
+If \ref{eq:bound} and \ref{eq:pol} hold then we can simply compute the root of $g(x)$ over the integers to have the same root $x_0$
+such that $f(x_0) \equiv 0 \mod N$.
+
+Howgrave-Graham's idea is to find this polynomial $g$ by combining polynomials $g_{i,j}$ who also have $x_0$ as roots modulo $N^m$.
+
+\vspace*{10px}
+
+The \textbf{LLL} algorithm is fundamental because:
+
+\begin{itemize}
+    \item It only does \textbf{integer linear operations} on the basis vectors.
+        In this way even if the basis is different it's only a linear combination of vector that still have $x_0$ as root
+        modulo $N^m$.
+    \item If we craft the lattice properly, the norm of shortest vector on the reduced basis will satisfy \ref{eq:pol}.
+\end{itemize}
+
+We can easily create polynomials $p_i$ ($g_{i,j}$ and $h_i$)  sharing the same root $x_0$ over $N^m$ of $f$ where $\delta$ is the degree of $f$:
+
+\begin{center}
+    \begin{eqnarray}
+        g_{i,j}(x) &= x^j \cdot N^i \cdot f^{m-i}(x) \text{ for } i = 0,\hdots,m-1,\hspace{2mm} j=0,\hdots,\delta-1 \label{eq:create_pol} \\
+        h_i(x) &= x^i \cdot f^m(x) \text{ for } i = 0,\hdots,t-1 
+    \end{eqnarray}
+\end{center}
 
 \subsection{Example}
 
@@ -377,7 +405,7 @@ The ciphertext is
 \]
 
 Suppose that we don't know the factorization of $N$ and we would like to know the message $m$.
-However we know the padding and the length of $m < 2^{16}$.
+However we know the padding and that the length of $m < 2^{16}$.
 
 \vspace*{10px}
 
@@ -387,7 +415,7 @@ Let's define
 a = 0x74686973206b65793a0000
 .\] 
 
-which is the known padding string.
+which is the known padding string that got encrypted.
 
 \vspace*{10px}
 
@@ -395,8 +423,8 @@ Thus we have that $c = (a + m)^3 \mod N$, for an unkown small $m$.
 We can define $f(x) = (a + x)^3 - c$, and so we setup the problem to find a small root $m$ such that $f(m) \equiv 0 \mod N$
 
 \begin{align*}
-    f(x) = x^3 + 0x15d393c596142306bae0000x^2 + 0x1b53c5e184a49b39f9ad9eedbx \\
-    + 0x9bb23cefd94fac9cc9cee9943
+    f(x) = x^3 + 0x15d393c596142306bae000000x^2 + 0x969acdb25c5f7b5ff7f29bc59x \\
+    + 0x75abf10edc37c4b90c5897322
 \end{align*}
 
 \vspace*{10px}
@@ -414,33 +442,58 @@ B =
 \end{pmatrix}
 \] 
 
-If we apply LLL to the lattice we get
+The rows of the matrix correspond to the coefficient vectors of the polynomials $f(x), Nx^2, Nx$ and $N$, furthermore we know
+that each polynomials will be 0 modulo $N$ if evaluated at $x = m$.
+We didn't fully applied Howgrave-Graham because we only used $m=1$ (the $N^m$ parameter not the message).\\
+With this lattice construction every vector is of the form $v = (v_1X^3, v_2X^2, v_1X, v_0)$, because any
+integer linear combination of the vector of the lattice will keep the bound $X^i$ for $i=0,..,\dim(B)-1$.
 
-\clearpage
-We can use lattices to solves the problem:
+\textbf{Apply LLL}. We then apply LLL to find the shortest vector of the reduced basis:
 
-\begin{itemize}
-    \item If we have some polynomial which share the same root $x_0$ over $N^m$ we can represent each of them as a row from lattice,
-        and every linear integer combination of rows between them will yield another polynomial having a root $x_0$.
-    \item Using \textbf{LLL} on the lattice we can find a reduced lattice basis, such that the norm of the shortest vector will
-        satisfy the inequality of \ref{eq:pol}. \textbf{LLL} will only use \textbf{linear integer operations} on the basis vectors,
-        in this way we preserve the root $x_0$ and the bound $X$.
-    \item Define the shortest vector in the reduced basis as $v = (v_0, v_1, \ldots, v_n)$. We can construct the polynomial
-        \begin{center}
-            \[
-                g(x) = v_0 + \frac{\displaystyle v_1}{X}x + \frac{v_2}{X^2}x^2 + \cdots + \frac{v_n}{X^n}x^n
-            \]
-        \end{center}
-\end{itemize}
-Since $g(x)$ is on the lattice we know that 
+\[
+    \begin{split}
+    v = (0x24409ad85f781X^3, -0xd75ab858b980X^2, \\
+        0x1973847f4ddb8X, -0x9a2d87b43d)
+    \end{split}
+\]
 
-\begin{center}
-    \begin{eqnarray}
-        g(x_0) \equiv 0 \mod N^m \\
-        \vert x_0| \le X \\
-        \lVert g(xX) \rVert < \frac{N^m}{\sqrt{deg(g) + 1}}
-    \end{eqnarray}
-\end{center}
+We can construct the polynomial $g$ using the coefficients of $v$
+
+\[
+    \begin{split}
+        g(x) = 0x24409ad85f781x^3  - 0xd75ab858b980x^2 \\ 
+        + 0x1973847f4ddb8x - 0x9a2d87b43d
+    \end{split}
+\]
+
+We know that
+
+\[
+    g(x_0) \equiv 0 \mod N, |x_0| \le X
+\]
+
+What we need to prove is that
+
+\[
+    \lVert g(xX) \rVert \le \frac{N}{\sqrt{n+1}}
+\] 
+
+In this example, det $B = X^6N^3$, and LLL will find a short vector with $\lVert v \rVert \le 1.02^n (\det B)^{\frac{1}{dimB}}$.
+If we ignore the $1.02^n$ factor, then we need to satisfy that
+
+\[
+    g(m) \le \lVert v \rVert \le (\det B)^{\frac{1}{4}} < X
+\] 
+
+\vspace*{10px}
+
+We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < N$, if we solves for $X$ this will be satisfied when $X < N^{\frac{1}{6}}$.
+In this case we have $N = 100$-bit number and $X = 2^{16}$, so $N^{\frac{1}{6}} > X$ and we have verified the correctness.\\
+
+If we compute the root of $g(x)$ over the integers we obtain $m = 0x61$ which is the correct result.\\
+
+If you want to find bigger root you need to create a bigger lattice with more polynomials generated with \ref{eq:create_pol},
+this method is better described in TODO.
 
 \section{Key recovery ECDSA}
 
