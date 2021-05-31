@@ -403,6 +403,9 @@ We can easily create polynomials $p_i$ ($g_{i,j}$ and $h_i$)  sharing the same r
     \end{eqnarray}
 \end{center}
 
+Applying \textbf{LLL} to a lattice constructed by the coefficients of \ref{eq:create_pol} we'll find a short vector $v = g(xX)$ that will
+satisfy \ref{eq:pol}. If we then take $g(x)$ we will be able to compute the root over the integer.
+
 \subsection{Example}
 
 We have a 100-bit \textbf{RSA} modulus
@@ -500,7 +503,7 @@ What we need to prove is that
 \] 
 
 In this example, det $B = X^6N^3$, and LLL will find a short vector with $\lVert v \rVert \le 2^{\frac{n(n-1)}{4(n)}} (\det B)^{\frac{1}{n}}$.
-If we ignore the $2^{\frac{3}{4}}$ factor (remember that $n = 4$), then we need to satisfy that
+If we ignore the $2^{\frac{3}{4}}$ factor (remember that $n = 4$), then we need to satisfy
 
 \[
     g(m) \le \lVert v \rVert \le (\det B)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}
@@ -522,7 +525,7 @@ This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the s
     \item \textasciitilde 683 unkown bits of message from an RSA 4096-bit modulus
 \end{itemize}
 
-If you want to find bigger root you need to create a bigger lattice with more polynomials generated with \ref{eq:create_pol},
+To compute bigger root a bigger lattice with more polynomials generated with \ref{eq:create_pol} is needed,
 this method is better described in TODO, but the principles are the same.
 
 \section{Key recovery ECDSA}
