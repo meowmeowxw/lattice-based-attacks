@@ -57,6 +57,13 @@ pprint(L)
 
 v = L[0]
 
+predicted_bound = 2^(3/4) * det^(1/4)
+nsqrt = n / sqrt(4)
+print(f"\ndet:               {int(det)}")
+print(f"||g(xX)||:           {int(v.norm())} <= ")
+print(f"2^(3/4)det^(1/4):    {int(predicted_bound)} < ")
+print(f"N / sqrt(4):         {int(nsqrt)}")
+
 print("v:    ", end="")
 for element in v:
     print(hex(element), end="  ")

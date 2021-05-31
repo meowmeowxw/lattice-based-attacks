@@ -12,18 +12,29 @@ def print_f(f):
         print(f"{hex(x)}x^{len(fl) -2 - i}", end=" + ")
     print(f"{hex(f[0])}", end="\n")
 
+#  while True:
+#      p = random_prime(2^49 - 1, false, 2^48)
+#      q = random_prime(2^49 - 1, false, 2^48)
+#      phi = (p - 1) * (q - 1)
+#      e = 3
+#      if gcd(e, phi) == 1:
+#          break
 
-n =  0xf046522fb555a90bdc558fc93
+#  n =  p * q
+
+n = 0x1a34992f64135aedaa0fe2bfd
+bl = int(n).bit_length()
 N = Zmod(n)
+pad = int.from_bytes(b"\xff" * ((bl // 8) - 1), "big")
 e = 3
-pad = int.from_bytes(b"this key:", "big")
-m = 0x6162
-z = (pad << 16) | m
-c = N(z) ^ e
+m = 0x4142
 a = pad << 16
-X = pow(2, 16)
+z = a | m
+c = N(z) ^ e
+X = 0x7b7b
 
 print(f"n:    {hex(n)}\ne:    {hex(e)}\npad:  {hex(pad)}\nc:    {hex(c)}\na:    {hex(a)}\nX:    {hex(X)}")
+print(f"n bit: {bl}")
 P.<x> = PolynomialRing(N)
 f = (a + x)^e - c
 print(f"f:   ", end=" ")
@@ -38,10 +49,10 @@ B = matrix([
     [0,   0,         0,       n],
 ])
 det = B.det()
+predicted_bound = 2^(3/4) * det^(1/4)
+nsqrt = n / sqrt(4)
 print("\nB:   ")
 pprint(B)
-print(f"det:  {det}")
-
 print("\n[!] Apply LLL")
 L = B.LLL()
 print("\nL:   ")
@@ -49,10 +60,14 @@ pprint(L)
 
 v = L[0]
 
+print(f"\ndet:               {int(det)}\n")
+print(f"||g(xX)||:           {int(v.norm())} <= ")
+print(f"2^(3/4)det^(1/4):    {int(predicted_bound)} < ")
+print(f"N / sqrt(4):         {int(nsqrt)}")
+
 print("v:    ", end="")
 for element in v:
     print(hex(element), end="  ")
-print("")
 
 assert v in span(B)
 

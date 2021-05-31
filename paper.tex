@@ -298,6 +298,8 @@ There are many applications of LLL
 
 \section{RSA introduction}
 
+\subsection{Algorithm}
+
 \textbf{RSA} is one of the earliest and most used asymmetric cryptosystem.
 The usual step to generate a public/private key for \textbf{RSA} is the following
 
@@ -321,7 +323,25 @@ To decrypt a ciphertext $c$
     $m = c^d \mod N$
 \end{center}
 
+\subsection{Security}
+
+RSA relies on the hardness of factoring the modulo $N$ and we don't have a polynomial algorithm to factor it, so it's considered secure.
+However there are different attacks against textbook RSA or a relaxed model of RSA:
+
+\begin{enumerate}
+    \item If $m < N^{\frac{1}{e}}$, then $m^e < N$ and the modulo operation is not applied and we only need to find the $e$th root of $c$ over the
+        integers to find $m$.
+    \item If $q = p + x$ where $x$ is small enough than it's easy to recover the factors of $N$ computing $A = \sqrt{N}$ and compute
+            $p = A - x$ for different value of $x$ until $N \mod p = 0$, then we have found $q = N / p$
+    \item Many more attacks can be found TODO.
+\end{enumerate}
+
 \section{Lattices against RSA}
+
+We want to attack a relaxed model of RSA where we know a part of the message $m$.
+We start introducing the \ref{TODO} coppersmith attack and the math behind it.
+
+\subsection{Mathematical introduction}
 
 It's easy to find the roots of a univariate polynomial over the integers. Finding the roots of \textbf{modular} polynomial is hard, example:
 
@@ -348,7 +368,7 @@ using the following theorem
 \begin{center}
     \begin{eqnarray}
         g(x_0) \equiv 0 \mod N^m, |x_0| \le X \label{eq:bound} \\
-         \lVert g(xX) \rVert < \frac{N}{\sqrt{n}} \label{eq:pol}
+         \lVert g(xX) \rVert < \frac{N^m}{\sqrt{n}} \label{eq:pol}
     \end{eqnarray}
 \end{center}
 
@@ -360,7 +380,7 @@ This theorem states that is possible to compute the root of $f(x) \mod N$ if we 
 If \ref{eq:bound} and \ref{eq:pol} hold then we can simply compute the root of $g(x)$ over the integers to have the same root $x_0$
 such that $f(x_0) \equiv 0 \mod N$.
 
-Howgrave-Graham's idea is to find this polynomial $g$ by combining polynomials $g_{i,j}$ who also have $x_0$ as roots modulo $N^m$.
+Howgrave-Graham's idea is to find this polynomial $g$ by combining polynomials $p_i$ who also have $x_0$ as roots modulo $N^m$.
 
 \vspace*{10px}
 
@@ -371,6 +391,7 @@ The \textbf{LLL} algorithm is fundamental because:
         In this way even if the basis is different it's only a linear combination of vector that still have $x_0$ as root
         modulo $N^m$.
     \item If we craft the lattice properly, the norm of shortest vector on the reduced basis will satisfy \ref{eq:pol}.
+        We know the length's bound of the shortest vector that LLL could find.
 \end{itemize}
 
 We can easily create polynomials $p_i$ ($g_{i,j}$ and $h_i$)  sharing the same root $x_0$ over $N^m$ of $f$ where $\delta$ is the degree of $f$:
@@ -444,7 +465,7 @@ B =
 
 The rows of the matrix correspond to the coefficient vectors of the polynomials $f(x), Nx^2, Nx$ and $N$, furthermore we know
 that each polynomials will be 0 modulo $N$ if evaluated at $x = m$.
-We didn't fully applied Howgrave-Graham because we only used $m=1$ (the $N^m$ parameter not the message).\\
+We applied Howgrave-Graham with $m=1$ (the $N^m$ parameter not the message).\\
 With this lattice construction every vector is of the form $v = (v_1X^3, v_2X^2, v_1X, v_0)$, because any
 integer linear combination of the vector of the lattice will keep the bound $X^i$ for $i=0,..,\dim(B)-1$.
 
@@ -475,20 +496,21 @@ We know that
 What we need to prove is that
 
 \[
-    \lVert g(xX) \rVert \le \frac{N}{\sqrt{n+1}}
+    \lVert g(xX) \rVert \le \frac{N}{\sqrt{n}}
 \] 
 
-In this example, det $B = X^6N^3$, and LLL will find a short vector with $\lVert v \rVert \le 1.02^n (\det B)^{\frac{1}{dimB}}$.
-If we ignore the $1.02^n$ factor, then we need to satisfy that
+In this example, det $B = X^6N^3$, and LLL will find a short vector with $\lVert v \rVert \le 2^{\frac{n(n-1)}{4(n)}} (\det B)^{\frac{1}{n}}$.
+If we ignore the $2^{\frac{3}{4}}$ factor (remember that $n = 4$), then we need to satisfy that
 
 \[
-    g(m) \le \lVert v \rVert \le (\det B)^{\frac{1}{4}} < X
+    g(m) \le \lVert v \rVert \le (\det B)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}
 \] 
 
 \vspace*{10px}
 
-We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < N$, if we solves for $X$ this will be satisfied when $X < N^{\frac{1}{6}}$.
-In this case we have $N = 100$-bit number and $X = 2^{16}$, so $N^{\frac{1}{6}} > X$ and we have verified the correctness.\\
+We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}$, if we solves for $X$ this will be satisfied when $X < (\frac{N}{16})^{\frac{1}{6}}$.
+With the numbers we have this inequality is verified, however even if the bound of the shortest vector is larger we still have some possibilities to
+find the correct root.
 
 If we compute the root of $g(x)$ over the integers we obtain $m = 0x6162$ which is the correct result.\\
 
