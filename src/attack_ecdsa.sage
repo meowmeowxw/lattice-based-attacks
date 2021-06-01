@@ -72,7 +72,12 @@ K = 2^32
 B = matrix(ZZ, [[n, 0, 0],
                 [t, 1, 0],
                 [u, 0, K]])
-L = B.BKZ()
+det = B.det()
+assert det == n * K
+print(f"sqrt(n): {isqrt(n)}")
+print(f"K:       {K}")
+
+L = B.LLL()
 print(L)
 for v in L:
     k1_, k2_ = v[0], v[1]
