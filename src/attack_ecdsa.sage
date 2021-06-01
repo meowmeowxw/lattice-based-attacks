@@ -7,7 +7,8 @@ from sage.misc.prandom import randrange
 print("[*] Test\n")
 p = 0xffffffffffffd21f
 E = EllipticCurve(GF(p), [0, 3])
-G = E([1, 2])
+# G = E.gen(0)
+G = E([14716423389447796975, 5382751491675231482])
 n = G.order()
 # d = randrange(1, n-1)
 d = 17297868438860976900
@@ -15,9 +16,11 @@ Q = d * G
 N = Zmod(n)
 nl = int(n).bit_length()
 print(E)
+print(f"p: {p} {hex(p)}")
 print(f"n: {n} {hex(n)}")
 print(f"d: {d} {hex(d)}")
-print(f"Q: {Q}")
+print(f"G: ({hex(G[0])}, {hex(G[1])})")
+print(f"Q: ({hex(Q[0])}, {hex(Q[1])})")
 
 m1 = b"message 1"
 m2 = b"message 2"
@@ -26,8 +29,8 @@ print(f"m2: {m2}")
 
 #  k1 = N(randrange(1, 2^32))
 #  k2 = N(randrange(1, 2^32))
-k1 = 0xa5fa39b
-k2 = 0x80de279e
+k1 = 0x50a65330
+k2 = 0x1f5b977a
 print(f"k1: {bin(abs(int(k1)))[2:].zfill(32)} {hex(k1)}")
 print(f"k2: {bin(abs(int(k2)))[2:].zfill(32)} {hex(k2)}")
 
@@ -49,8 +52,8 @@ s2 = (h2 + d*r2) / k2
 print(f"P1: {P1}")
 print(f"P2: {P2}")
 
-print(f"s1: {hex(s1)}")
-print(f"s2: {hex(s2)}")
+print(f"(r1, s1): ({hex(r1)}, {hex(s1)})")
+print(f"(r2, s2): ({hex(r2)}, {hex(s2)})")
 
 u11 = h1 / s1
 u12 = r1 / s1

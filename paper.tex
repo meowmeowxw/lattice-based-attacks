@@ -25,6 +25,7 @@
 \newtheorem{property}{Property}[section]
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\F}{\mathbb{F}}
 \newcommand{\dd}{\cdot}
 
 \title{Introduction to LLL\\``Cryptography''}
@@ -326,15 +327,15 @@ To decrypt a ciphertext $c$
 \subsection{Security}
 
 RSA relies on the hardness of factoring the modulo $N$ and we don't have a polynomial algorithm to factor it, so it's considered secure.
-However there are different attacks against textbook RSA or a relaxed model of RSA:
+However there are different attacks against textbook RSA or bad implementations:
 
-\begin{enumerate}
+\begin{itemize}
     \item If $m < N^{\frac{1}{e}}$, then $m^e < N$ and the modulo operation is not applied and we only need to find the $e$th root of $c$ over the
         integers to find $m$.
     \item If $q = p + x$ where $x$ is small enough than it's easy to recover the factors of $N$ computing $A = \sqrt{N}$ and compute
             $p = A - x$ for different value of $x$ until $N \mod p = 0$, then we have found $q = N / p$
     \item Many more attacks can be found TODO.
-\end{enumerate}
+\end{itemize}
 
 \section{Lattices against RSA}
 
@@ -547,7 +548,8 @@ We also need to create a private key $d \in [1, n-1]$ and public key $Q = dG$. T
     \item Compute $h = $ HASH$(m)$ where HASH is a cryptographic hash functions.
     \item Select a random integer $k \in [1, n-1]$.
     \item Calculate $P = kG = (x_1, y_1)$ and set $r = (x_1)$.
-    \item Compute $s = k^{-1}(h + dr) \mod n$.
+    \item Compute $s = k^{-1}(h + dr) \mod n$, if $s = 0$ repeat the steps.
+    \item The signature is composed by $(r, s)$.
 \end{enumerate}
 
 \vspace*{10px}
@@ -557,15 +559,101 @@ To \textbf{verify} the signature:
 \begin{enumerate}
     \item Compute $h = $ HASH$(m)$.
     \item Calculate $u_1 = hs^{-1} \mod n$ and $u_2 = rs^{-1} \mod n$.
-    \item Compute $P = u_1G + u_2Q = (x_1, y_1)$.
+    \item Compute $P = u_1G + u_2Q = (x_1, y_1)$, if $P = O$ the signature is invalid.
     \item If $r \equiv x_1 \mod n$ then the signature is valid.
 \end{enumerate}
 
 \subsection{Security}
 
+The security of \textbf{ECDSA} depends on the discrete logarithm problem.
+Given the points $Q, G$ such that $Q = k*G$ it's considered an hard problem to find $k$.
+However as RSA there are lots of implementation attacks
+
+\begin{itemize}
+    \item If the same $k$ is used to generate two different signatures it's possible to recover the secret key $d$. This was a real bug 
+        discovered in the Playstation 3.
+    \item It's possible to recover $d$ if the parameter $k$ is not generated with a cryptographically secure pseudo random generator.
+    \item If the elliptic curve used is not standardized (custom) then it's possible that the discrete logarithm is easily solvable.
+\end{itemize}
+
 \section{Lattices against ECDSA}
 
 \subsection{Example}
+
+Let $p = \texttt{0xffffffffffffd21f}$ and let $E: y^2 = x^3 + 3$ be an elliptic curve over $\F_p$ with the generator
+$G = (\texttt{0xcc3b3d1a0c4938ef}, \texttt{0x4ab35ff66f8194fa})$ with order $n = \texttt{0xfffffffefa23f437}$.
+
+\vspace*{10px}
+
+We have two signature:
+
+\[
+    \begin{array}{c}
+        (r_1, s_1) = (\texttt{0x269fa43451c5ff3c}, \texttt{0x1184ec0a74d4be7c}) \\
+        \text{and hash } h_1 = \texttt{0xb526aef1a341cfe6}
+    \end{array}
+\]
+
+\[
+    \begin{array}{c}
+        (r_2, s_2) = (\texttt{0xf77cda14f5bf50a2}, \texttt{0xcd1143ccc1516b02}) \\ 
+        \text{and hash } h_2 = \texttt{0x84768ddee659efea}
+    \end{array}
+\]
+
+And we know that both of these signatures use 32-bit nonce $k$, note that $n$ is a 64-bit number. We can set up the problem as a system of equation
+
+\[
+    \begin{array}{c}
+        s_1 \equiv \displaystyle\frac{h_1 + dr_1}{k_1} \mod n \\ \\ 
+        s_2 \equiv \displaystyle\frac{h_2 + dr_2}{k_2} \mod n
+    \end{array}
+\]
+
+We don't know $d, k_1, k_2$, but we can write 
+
+\[
+    d = \displaystyle\frac{s_1k_1 - h_1}{r_1}
+\]
+
+and rewrite the equation in
+
+\[
+    k_1 - s_1^{-1}s_2r_1^{-1}k_2 + s_1^{-1}r_1h_2r_2^{-1} - s_1^{-1}h_1 \equiv 0 \mod n
+\]
+
+To simplify the equation we write $t = - s_1^{-1}s_2r_1^{-1}k_2$ and $u = s_1^{-1}r_1h_2r_2^{-1} - s_1^{-1}h_1$. In this way we have
+
+\[
+    \begin{array}{c}
+        k_1 + tk_2 + u \equiv 0 \mod n \\
+        \text{or} \\
+        -k_1 = tk_2 + u - xn \text{   for some $x$}
+    \end{array}
+\]
+
+We know that $|k_1|, |k_2| < K = 2^{32}$.
+
+\vspace*{10px}
+
+\textbf{Lattice construction}. We construct the lattice
+
+\[
+    B = 
+    \begin{pmatrix}
+        n & 0 & 0 \\
+        t & 1 & 0 \\
+        u & 0 & K \\
+    \end{pmatrix}
+\]
+
+The vector $v = (-k_1, k_2, K)$ is in the lattice because
+
+\[
+    v = (tk_2 + u - xn = -k_1, k_2, K)
+\]
+
+for some $x, k_1, k_2 \in Z$.
 
 \chapter*{End of Paper}
 
