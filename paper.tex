@@ -296,7 +296,7 @@ There are many applications of LLL
 
 % \section{Attack Knapsack}
 
-\section{RSA introduction}
+\section{RSA Introduction}
 
 \subsection{Algorithm}
 
@@ -528,7 +528,44 @@ This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the s
 To compute bigger root a bigger lattice with more polynomials generated with \ref{eq:create_pol} is needed,
 this method is better described in TODO, but the principles are the same.
 
-\section{Key recovery ECDSA}
+\section{ECDSA Introduction}
+
+\subsection{Algorithm}
+
+\textbf{ECDSA} is a variant of the Digital Signature Algorithm (\textbf{DSA}) which uses elliptic curve cryptography.
+To digitally sign a message we have 3 public parameters
+
+\begin{itemize}
+    \item The elliptic curve \textbf{$E$}.
+    \item The generator point \textbf{$G$}.
+    \item The generator's order \textbf{$n$}.
+\end{itemize}
+
+We also need to create a private key $d \in [1, n-1]$ and public key $Q = dG$. To digitally \textbf{sign} a message $m$:
+
+\begin{enumerate}
+    \item Compute $h = $ HASH$(m)$ where HASH is a cryptographic hash functions.
+    \item Select a random integer $k \in [1, n-1]$.
+    \item Calculate $P = kG = (x_1, y_1)$ and set $r = (x_1)$.
+    \item Compute $s = k^{-1}(h + dr) \mod n$.
+\end{enumerate}
+
+\vspace*{10px}
+
+To \textbf{verify} the signature:
+
+\begin{enumerate}
+    \item Compute $h = $ HASH$(m)$.
+    \item Calculate $u_1 = hs^{-1} \mod n$ and $u_2 = rs^{-1} \mod n$.
+    \item Compute $P = u_1G + u_2Q = (x_1, y_1)$.
+    \item If $r \equiv x_1 \mod n$ then the signature is valid.
+\end{enumerate}
+
+\subsection{Security}
+
+\section{Lattices against ECDSA}
+
+\subsection{Example}
 
 \chapter*{End of Paper}
 
