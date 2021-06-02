@@ -463,7 +463,7 @@ B =
     X^3 & f_2X^2 & f_1X & f_0 \\
     0 & NX^2 & 0 & 0 \\
     0 & 0 & NX & 0 \\
-    0 & 0 & 0 & N \\
+    0 & 0 & 0 & N
 \end{pmatrix}
 \] 
 
@@ -578,7 +578,7 @@ However as RSA there are lots of implementation attacks
 
 \section{Lattices against ECDSA}
 
-\subsection{Example}
+\subsection{Recover $d$ from a pair of signatures with small $k_1, k_2$}
 
 Let $p = \texttt{0xffffffffffffd21f}$ and let $E: y^2 = x^3 + 3$ be an elliptic curve over $\F_p$ with the generator
 $G = (\texttt{0xcc3b3d1a0c4938ef}, \texttt{0x4ab35ff66f8194fa})$ of order $n = \texttt{0xfffffffefa23f437}$.
@@ -643,7 +643,7 @@ We know that $|k_1|, |k_2| < K = 2^{32}$.
     \begin{pmatrix}
         n & 0 & 0 \\
         t & 1 & 0 \\
-        u & 0 & K \\
+        u & 0 & K
     \end{pmatrix}
 \]
 
@@ -682,9 +682,82 @@ So we want that
 
 And if we remove the smaller terms this will be satisfied when $K < (nK)^{\frac{1}{3}}$ or $K < \sqrt{n}$.
 
-This method is described better in
+In this case if we apply LLL in the second row we obtain:
+
+\begin{center}
+    $v = (-k_1, k_2, K) = (\texttt{-0x50a65330, 0x1f5b977a, 0x100000000})$
+\end{center}
+
+To retrieve $d$ we just need to compute 
+
+\[
+    d = r_1^{-1}(k_1s_1 - h_1) = \texttt{0xf00e5fb275bfd304}
+\]
+
+Source of the method:
 
 %Boneh-Venkatesan1996_Chapter_HardnessOfComputingTheMostSign-1.pdf, HPL-1999-90-1.pdf, https://www.researchgate.net/publication/2406712_The_Insecurity_of_the_Elliptic_Curve_Digital_Signature_Algorithm_with_Partially_Known_Nonces
+
+\subsection{Recover $d$ from many signatures}
+
+Suppose we have many signatures $(r_1, s_1), \ldots, (r_m, s_m)$ with message hashes $h_1, \ldots, h_m$. We can write the equivalence
+$s_i \equiv k_i^{-1}(h_i +  dr_i) \mod n$ for $i = 1,\ldots,m$ and we can remove $d$ as before to get
+
+\[
+\begin{array}{c}
+    k_1 + t_1k_m + u_1 \equiv 0 \mod n \\
+    k_2 + t_2k_m + u_2 \equiv 0 \mod n \\
+    \vdots \\
+    k_{m-1} + t_{m-1}k_m + u_{m-1} \equiv 0 \mod n
+\end{array}
+\]
+
+\vspace*{10px}
+
+And create the lattice $B$ as
+
+\[
+    B = 
+    \begin{pmatrix}
+     n &  \\
+     & n \\
+     & & \ddots \\
+     & & & n \\
+     t_1 & t_2 & \cdots & t_{m-1} & 1 & 0 \\
+     u_1 & u_2 & \cdots & u_{m-1} & 0 & K
+     \label{eq:lattice_ecdsa}
+    \end{pmatrix}
+\]
+
+\vspace*{10px}
+
+Same as before this lattice contains $v = (-k_1, -k_2, \ldots, k_m, K)$ and with probability TODO we can find that vector after applying LLL.
+
+\subsection{Recover $d$ knowing MSB bits from each $k$}
+
+What if we know the firsts MSB bits of each $k_i$?
+
+Well, we can write $k_i = (a_i + b_i)$, where $a_i$ is the known part and $b_i$ is the unkown part that satisfies $|b_i| < K$. If we plug these values
+into the equivalence we obtain
+
+\[
+    \begin{array}{c}
+        k_i + t_ik_m + u_i \equiv 0 \mod n \\
+        (a_i + b_i) + t_i(a_m + b_m) + u_i \equiv 0 \mod n \\
+        b_i + t_ib_m + a_i + t_ia_m + u_i \equiv 0 \mod n \\
+    \end{array}
+\]
+
+And we can set $u_i' = a_i + t_ia_m + u_i$ to be the value inside the lattice \ref{eq:lattice_ecdsa} instead of $u_i$. In this way the vector
+
+\begin{center}
+    $v = (-b_1, -b_2, \ldots, b_m, K)$
+\end{center}
+
+is in the lattice and could be found using LLL. To recover the original $(k_1, \ldots, k_m)$ we must add to $v$ the vector $w = (a_1, \ldots, a_m)$.
+
+I was able to recover the nonces with the $10$ MSB bits known on the curve \texttt{secp256r1} given $100$ signatures, but it's also possible
+to recover the nonces with less known bits as shown in \href{https://eprint.iacr.org/2020/1540}{paper}.
 
 \chapter*{Conclusion}
 
