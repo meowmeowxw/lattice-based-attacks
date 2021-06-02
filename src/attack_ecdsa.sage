@@ -82,9 +82,9 @@ print(L)
 for v in L:
     k1_, k2_ = v[0], v[1]
     if abs(k1_) == k1 and abs(k2_) == k2:
-        print("[!] FOUND k1, k2")
-        print(hex(abs(k1_)), hex(abs(k2_)))
-
+        print("[!] found k1, k2")
+        d_ = N(abs(k1_)*s1 - h1) / r1
+        print(f"k1: {hex(abs(k1_))}, k2: {hex(abs(k2_))}, d: {hex(d_)}")
 
 
 print("[*] Test 2\n")
@@ -108,7 +108,8 @@ print(f"Q: ({hex(Q[0])}, {hex(Q[1])})")
 num = 20
 messages = [f"message {i}".encode() for i in range(num)]
 
-keys = [randrange(1, 2^50) for _ in range(num)]
+K = 2^50
+keys = [randrange(1, K) for _ in range(num)]
 h = [int.from_bytes(sha256(m).digest()[:nl//8], "big") for m in messages]
 a_known = [k & 3 for k in keys]
 
@@ -150,13 +151,105 @@ for i in range(num - 1):
     B[i, i] = n
 B = B.insert_row(num, t)
 B = B.insert_row(num + 1, u)
-print(B)
+# print(B)
 
-L = B.BKZ()
+L = B.LLL()
 print("\n[!] reduced\n\n")
-print(L)
+# print(L)
 for i, v in enumerate(L):
     if all([x == k for x, k in zip(map(abs, v), keys)]):
         print(f"[!] found {i}th row")
         print(f"original: {keys}")
         print(f"found:    {list(map(abs, v[:-1]))}")
+
+
+print("\n\n[*] Test 3\n")
+p = 0xffffffffffffd21f
+E = EllipticCurve(GF(p), [0, 3])
+# G = E.gen(0)
+G = E([14716423389447796975, 5382751491675231482])
+n = G.order()
+d = randrange(1, n-1)
+#  d = 17297868438860976900
+Q = d * G
+N = Zmod(n)
+nl = int(n).bit_length()
+print(E)
+print(f"p: {p} {hex(p)}")
+print(f"n: {n} {hex(n)}")
+print(f"d: {d} {hex(d)}")
+print(f"G: ({hex(G[0])}, {hex(G[1])})")
+print(f"Q: ({hex(Q[0])}, {hex(Q[1])})")
+
+num = 80
+messages = [f"message {i}".encode() for i in range(num)]
+
+exp = 64
+keys = [randrange(2^(exp - 1), 2^exp) for _ in range(num)]
+h = [int.from_bytes(sha256(m).digest()[:nl//8], "big") for m in messages]
+a = [k & (sum(2^(exp - i) for i in range(10))) for k in keys]
+K = 2^(exp - 9)
+
+print(f"k[0]: {bin(abs(int(keys[0])))[2:]} {hex(keys[0])} {bin(abs(int(a[0])))[2:].zfill(exp)}")
+print(f"k[1]: {bin(abs(int(keys[1])))[2:]} {hex(keys[1])} {bin(abs(int(a[1])))[2:].zfill(exp)}")
+
+print(f"h[0]: {hex(h[0])}")
+print(f"h[1]: {hex(h[1])}")
+
+Points = [int(keys[i]) * G for i in range(num)]
+xs = [P[0] for P in Points]
+r = [N(x) for x in xs]
+s =  [(h[i] + d*r[i]) / N(keys[i]) for i in range(num)]
+
+print(f"P[0]: {Points[0]}")
+print(f"P[1]: {Points[1]}")
+
+print(f"(r[0], s[0]): ({hex(r[0])}, {hex(s[0])})")
+print(f"(r[1], s[1]): ({hex(r[1])}, {hex(s[1])})")
+
+t = []
+for i in range(num - 1):
+    t.append(int((-1/s[i]) * s[num-1] * r[i] * (1/r[num - 1])))
+t.extend([1, 0])
+t = vector(ZZ, t)
+
+print(len(t))
+print(f"t: {t}")
+print(f"a: {a}")
+
+u = []
+for i in range(num - 1):
+    u.append(int((1/s[i]) * r[i] * h[num - 1] * (1/r[num - 1]) - ((1/s[i]) * h[i])))
+for i in range(num - 1):
+    # u[i] = int(N(2^(exp - 4))*(a[i] + t[i]*a[num-1] + u[i]))
+    #  bi = keys[i] & (2^(exp - 9) - 1)
+    # print(f"{bin(keys[i])[2:].zfill(exp)}, ki = {keys[i]}")
+    # print(f"{bin(bi)[2:].zfill(exp)}, {bi}")
+    # print(f"{bin(a[i])[2:].zfill(exp)}, {a[i]}")
+    # print(f"bi + ai = {bi + a[i]}")
+    #  bm = keys[num-1] & (2^(exp - 9) - 1)
+    # z = (a[i] + bi) + t[i]*(a[num-1] + bm) + u[i]
+    # print(f"z mod n {z % n}")
+    u[i] = int(N(u[i] + a[i] + t[i]*a[num-1]))
+u.extend([0, K])
+u = vector(ZZ, u)
+print(f"u: {u}")
+
+B = matrix(ZZ, num, num + 1)
+for i in range(num - 1):
+    B[i, i] = n
+B = B.insert_row(num, t)
+B = B.insert_row(num + 1, u)
+# print(B)
+
+L = B.BKZ()
+print("\n[!] reduced\n\n")
+# print(L)
+for i, v in enumerate(L):
+    w = []
+    for i, x in enumerate(map(abs, v[:-1])):
+        w.append(x + a[i])
+    if all([x == k for x, k in zip(w, keys)]):
+        print(f"[!] found {i}th row")
+        print(f"original: {keys}")
+        print(f"found:    {w}")
