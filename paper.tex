@@ -636,7 +636,7 @@ We know that $|k_1|, |k_2| < K = 2^{32}$.
 
 \vspace*{10px}
 
-\textbf{Lattice construction}. We construct the lattice
+\textbf{Lattice construction}. We construct the lattice $B = (b_0, b_1, b_2)$:
 
 \[
     B = 
@@ -647,10 +647,10 @@ We know that $|k_1|, |k_2| < K = 2^{32}$.
     \end{pmatrix}
 \]
 
-The vector $v = (-k_1, k_2, K)$ is in the lattice because
+Note that the vector $v = (-k_1, k_2, K)$ is in the lattice because
 
 \[
-    v = (tk_2 + u - xn = -k_1, k_2, K)
+    v = -xb_0 + k_2b_1 + b_2 = (-xn + tk_2 + u = -k_1, k_2, K)
 \]
 
 for some $x, k_2 \in Z$.
