@@ -32,7 +32,7 @@
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\dd}{\cdot}
 
-\title{Introduction to LLL\\``Cryptography''}
+\title{Introduction to Lattices Attacks\\``Cryptography''}
  
 \author{Di Santi Giovanni}
 \date{\today}
@@ -225,17 +225,17 @@ a different basis.
 
 \subsection{SVP}
 
-\textbf{The Shortest Vector Problem} (\texttt{SVP}): Find a nonzero vector $v \in L$ that minimez the Euclidean norm $\lVert v \rVert$.
-
-\begin{figure}[!b]
-    \centering
-    \includegraphics[width=0.5\textwidth]{./img/gauss_svp.png}
-    \caption{Gauss reduction}
-    \label{fig:gauss_svp}
-\end{figure}
+\textbf{The Shortest Vector Problem} (\texttt{SVP}): \textit{Find a nonzero vector $v \in L$ that minimez the Euclidean norm $\lVert v \rVert$.}
 
 Gauss's developed an algorithm to find an optimal basis for a two-dimensional lattice given an arbitrary basis. The output of the algorithm
 gives the shortest nonzero vector in $L$ and in this way solves the \texttt{SVP}.
+
+\begin{figure}[!b]
+    \centering
+    \includegraphics[width=0.6\textwidth]{./img/gauss_svp.png}
+    \caption{Gauss reduction}
+    \label{fig:gauss_svp}
+\end{figure}
 
 \begin{algorithm}[H]
     \vspace*{5px}
@@ -252,28 +252,32 @@ gives the shortest nonzero vector in $L$ and in this way solves the \texttt{SVP}
     \caption{Gauss Basis Reduction}
 \end{algorithm}
 
-If we take for example $v_1 = (8, 4), v_2 = (7, 5)$ and apply the gauss reduction algorithm we
-obtain $w_1 = (1, -1), w_2 = (6, 6)$ \ref{fig:gauss_svp}. $w_1$ is the shortest nonzero vector in the lattice $L$ spanned by $v_1, v_2$.
+\textbf{Example}. Let $L$ a lattice spanned by $v_1 = (8, 4), v_2 = (7, 5)$, if we apply the gauss reduction algorithm we
+obtain $w_1 = (1, -1), w_2 = (6, 6)$ \ref{fig:gauss_svp}. $w_1$ is the shortest nonzero vector in the lattice $L$.
 
-The bigger the dimension of the lattice, the harder is the problem and there isn't a polynomial algorithm to find such vector.
+The bigger the dimension of the lattice, the harder is the problem and there isn't a polynomial algorithm to solve it.
 
 \subsection{CVP}
 
-\textbf{The Closest Vector Problem} (\texttt{CVP}): Given a vector $w \in \R^m$ that is not in $L$, find a vector $v \in L$ that is closest to $w$,
-in other words find a vector $v \in L$ that minimizes the Euclidean norm $\lVert w - v \rVert$.
+\textbf{The Closest Vector Problem} (\texttt{CVP}): \textit{Given a vector $t \in \R^m$ that is not in $L$, find the vector $v \in L$
+    closest to $t$, in other words find a vector $v \in L$ that minimizes the Euclidean norm $\lVert t - v \rVert$.}
 
-TODO FIX \ref{fig:cvp} is wrong, the lattice is different.
-
-\begin{figure}[t]
+\begin{figure}[!ht]
     \centering
-    \includegraphics[width=0.5\textwidth]{./img/cvp.png}
+    \includegraphics[width=0.6\textwidth]{./img/cvp.png}
     \caption{CVP}
     \label{fig:cvp}
 \end{figure}
 
-TODO: CVP and SVP are related.
+\texbtf{Example}. Let $L$ a lattice spanned by $v_1 = (0, 1), v_2 = (2, 0)$, and a target vector $t = (2.3, 2.4)$. The closest vector
+to $t$ in the lattice $L$ is $w = (2, 2)$.\\
 
-% matrix([[0, 0, 1], [1, 1, 2], [1, 2, 1]])
+Both \textbf{CVP} and \textbf{SVP} are $\mathcal{NP}$-hard problems, thus the complexity of the problem increments with the dimension
+of the lattice. They can be used as primitive to create a trapdoor functions for a cryptographic scheme.
+
+There are various algorithms that can output a solution under certain constraints for an approximation of both \textbf{SVP}
+and \textbf{CVP}, for example \textbf{LLL}\cite{LLL} and \textbf{Babai's algorithm}\cite{babai} respectively.
+
 \chapter{LLL}
 
 \section{Introduction}
