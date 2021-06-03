@@ -5,7 +5,8 @@
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{wrapfig}
-\usepackage{algorithmic}
+\usepackage{algorithm}% http://ctan.org/pkg/algorithms
+%\usepackage{algorithmicx}
 \usepackage[utf8]{inputenc}
 \usepackage{fontenc}
 \usepackage{amsmath,stmaryrd,mathtools,algorithm}
@@ -39,14 +40,35 @@
 
 \tableofcontents
 
+\chapter{Introduction}
+
+Lattices are powerful mathematical objects that can be used in computer science and mathematics to solves an extensive range of different problems.
+In the recents years many post-quantum cryptographic protocols candidates involve the use of hard lattices problems,
+for example the \textbf{Learning With Errors} \cite{LWE}.
+Lattice constructions can also be used in cryptanalysis to break cryptographic schemes, typically using reduction
+algorithms as \textbf{LLL} \cite{LLL}.
+
+To introduce the mathematics of lattices a basic linear algebra background is needed, so the second chapter is a summary of the
+basics properties needed to understand it. We used as main resource ``An Introduction to Mathematical Cryptography''\cite{mathcrypto14} to
+explain them, but we also tried to gives some geometrically intuition behind some operations.
+
+Cryptographic protocol as \textbf{RSA} and \textbf{ECDSA} are considered secure, however there are various attacks against a
+relaxed-model of each of them, i.e., What if we know some bits of the secret key? What if we know a part of the message before the encryption?
+We present an introduction to the attacks which involves lattices against these protocols. The code used to confirm the correctness
+of the attacks is available on the repository \cite{repo} and the main reference was
+``Recovering cryptographic keys from partial information, by example''\cite{cryptoeprint:2020:1506}.
+
 \chapter{Linear Algebra Background}
+
+We'll start with some definitions and properties needed to understand the lattices, to move later on the mathematics behind them and some
+hard problems related to it. At the end of the chapter the reader should be able to follow the math used in the other chapters.
 
 \section{Vector Spaces}
 
 \begin{definition}
     \textbf{Vector space}.
 \end{definition}
-A \texttt{vector space} $V$ is a subset of $\R^{m}$ which is closed under finite vector addition and scalar multiplication, with the property that
+A \textit{vector space} $V$ is a subset of $\R^{m}$ which is closed under finite vector addition and scalar multiplication, with the property that
 
 \begin{center}
    $a_1v_1 + a_2v_2 \in V$ for all $v_1,v_2 \in V$ and all $a_1,a_2 \in \R$
@@ -56,7 +78,7 @@ A \texttt{vector space} $V$ is a subset of $\R^{m}$ which is closed under finite
     \textbf{Linear Combinations}
 \end{definition}
 
-Let $v_1,v_2,\ldots,v_k \in V$. A \texttt{linear combination} of $v_1,v_2,\ldots,v_k \in V$ is any vector of the form
+Let $v_1,v_2,\ldots,v_k \in V$. A \textit{linear combination} of $v_1,v_2,\ldots,v_k \in V$ is any vector of the form
 
 \begin{center}
     $\alpha_1v_1 + \alpha_2v_2 + \cdots + \alpha_kv_k$ with $\alpha_1, \ldots, \alpha_k \in \R$
@@ -66,7 +88,7 @@ Let $v_1,v_2,\ldots,v_k \in V$. A \texttt{linear combination} of $v_1,v_2,\ldots
     \textbf{Lineaer Independece}
 \end{definition}
 
-A set of vectors $v_1,v_2,\ldots,v_k \in V$ is \texttt{linearly independent} if the the only way to get
+A set of vectors $v_1,v_2,\ldots,v_k \in V$ is \textit{linearly independent} if the the only way to get
 
 \begin{center}
     $a_1v_1 + a_2v_2 + \cdots + a_kv_k = 0$
@@ -78,7 +100,7 @@ is to have $a_1 = a_2 = \cdots = a_k = 0$.
     \textbf{Bases}
 \end{definition}
 
-Taken a set of linearly independent vectors $b = (v_1,\ldots,v_n) \in V$ we say that $b$ is a \texttt{basis} of $V$ if $\forall w \in V$ we can write
+Taken a set of linearly independent vectors $b = (v_1,\ldots,v_n) \in V$ we say that $b$ is a \textit{basis} of $V$ if $\forall w \in V$ we can write
 
 \begin{center}
     $w = a_1v_1 + a_2v_2 + \cdots + a_nv_n$
@@ -88,7 +110,7 @@ Taken a set of linearly independent vectors $b = (v_1,\ldots,v_n) \in V$ we say 
     \textbf{Vector's length}
 \end{definition}
 
-The vector's length or \texttt{Euclidean norm} of $v = (x_1, x_2, \ldots, x_m)$ is
+The vector's length or \textit{Euclidean norm} of $v = (x_1, x_2, \ldots, x_m)$ is
 
 \begin{center}
     $\lVert v \rVert = \sqrt{x_1^2 + x_2^2 + \cdots + x_m^2}$
@@ -98,7 +120,7 @@ The vector's length or \texttt{Euclidean norm} of $v = (x_1, x_2, \ldots, x_m)$ 
     \textbf{Dot Product}
 \end{definition}
 
-Let $v, w \in V \subset \R^m$ and $v = (x_1, x_2, \ldots, x_m), w = (y_1, y_2, \ldots, y_m)$, the \texttt{dot product} of $v$ and $m$ is
+Let $v, w \in V \subset \R^m$ and $v = (x_1, x_2, \ldots, x_m), w = (y_1, y_2, \ldots, y_m)$, the \textit{dot product} of $v$ and $m$ is
 
 \begin{center}
     $v \dd m = x_1y_1 + x_2y_2 + \cdots + x_my_m$
@@ -113,7 +135,7 @@ where $\theta$ is the angle between $v$ and $w$ if we place the starting points 
 \begin{figure}[!b]
     \centering
     \includegraphics[scale=0.2]{./img/dot_product.png}
-    \caption{Dot Product By 3Blue1Brown}
+    \caption{Dot Product By 3Blue1Brown \cite{3b1b}}
     \label{fig:dot_product}
 \end{figure}
 
@@ -123,13 +145,13 @@ Geometrically speaking $v \cdot m$ is the length of $w$ projected to $v$ multipl
     \textbf{Ortoghonal Basis} 
 \end{definition}
 
-An \texttt{ortoghonal basis} for a vector space $V$ is a basis $v_1, \ldots, v_m$ with the property that
+An \textit{ortoghonal basis} for a vector space $V$ is a basis $v_1, \ldots, v_m$ with the property that
 
 \begin{center}
     $v_i \dd v_j = 0$ for all $i \neq j$
 \end{center}
 
-If $\lVert v_i \rVert = 1$ for all $i$ then the basis is \texttt{orthonormal}.
+If $\lVert v_i \rVert = 1$ for all $i$ then the basis is \textit{orthonormal}.
 
 \begin{algorithm}
     \textbf{Gram-Schmidt Algorithm}
@@ -154,7 +176,7 @@ If we take $v_1=(4, 1), v_2=(2, 3)$ as basis and apply gram schmidt we obtain $u
     \textbf{Lattice}
 \end{definition}
 
-Let $v_1,\ldots,v_n \in \R^m, m \ge n$ be linearly independent vectors. A \texttt{Lattice} $L$ spanned by $\{v_1,\ldots,n_n\}$ is the set of 
+Let $v_1,\ldots,v_n \in \R^m, m \ge n$ be linearly independent vectors. A \textit{Lattice} $L$ spanned by $\{v_1,\ldots,n_n\}$ is the set of 
 all integer linear combinations of $v_1,\ldots,v_n$.
 
 \begin{center}
@@ -162,7 +184,7 @@ all integer linear combinations of $v_1,\ldots,v_n$.
 \end{center}
 
 If $v_i$ for every $i = 1,\ldots\,n$ has integer coordinates then the lattice is
-called \texttt{Integral Lattice}.
+called \textit{Integral Lattice}.
 
 On the figure \ref{fig:lattice0} we show a lattice $L$ with bases $v=(3, 1)$ and $w=(-1, 1)$, and on \ref{fig:lattice1} the same lattice $L$ with
 a different basis.
@@ -192,7 +214,14 @@ a different basis.
 \textbf{The Shortest Vector Problem} (\texttt{SVP}): Find a nonzero vector $v \in L$ that minimez the Euclidean norm $\lVert v \rVert$.
 
 \begin{algorithm}
-    \textbf{Gauss Reduction}
+    \caption{Gauss Basis Reduction}
+    \vspace*{5px}
+    \text{Loop} \\
+    If $\lVert v_2 \rVert < \lVert v_1 \rVert$ , \text{swap }$v_1, v_2$ \\
+    m = $\left \lceil{(v_1 \cdot v_2) {\lVert v_1 \rVert}^{-2}} \right \rceil$ \\
+    \text{If } $m = 0$, \text{return } $v_1, v_2$ \\
+    $v_2 = v_2 - mv_1$ \\
+    \text{Continue Loop}
 \end{algorithm}
 
 \begin{figure}[b]
@@ -293,7 +322,7 @@ There are many applications of LLL
     \item Application in cryptanalysis.
 \end{enumerate}
 
-\chapter{Cryptanlysis}
+\chapter{RSA Cryptanalysis}
 
 % \section{Attack Knapsack}
 
@@ -521,13 +550,34 @@ If we compute the root of $g(x)$ over the integers we obtain $m = 0x6162$ which 
 This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the same construction will work if we want to find
 
 \begin{itemize}
-    \item \textasciitilde 170 unkown bits of message from an RSA 1024-bit modulus
-    \item \textasciitilde 341 unkown bits of message from an RSA 2048-bit modulus
-    \item \textasciitilde 683 unkown bits of message from an RSA 4096-bit modulus
+    \item $\approx$ 170 unkown bits of message from an RSA 1024-bit modulus
+    \item $\approx$ 341 unkown bits of message from an RSA 2048-bit modulus
+    \item $\approx$ 683 unkown bits of message from an RSA 4096-bit modulus
 \end{itemize}
 
 To compute bigger root a bigger lattice with more polynomials generated with \ref{eq:create_pol} is needed,
 this method is better described in TODO, but the principles are the same.
+
+\subsection{Factorize modulus with known MSB bits of $p$}
+
+Knowing the most significat bits of $p$ can be used to factor the modulus $N$ ref TODO coppersmith.
+
+Let $a = 2^lb$ where $b$ are the bits known of $p$, then $p = a + r$ for some small value of $r$.
+
+Using as lattice basis
+
+\[
+    B = 
+    \begin{pmatrix}
+        X^2 & Xa & 0 \\
+        0 & X & a \\
+        0 & 0 & N
+    \end{pmatrix} 
+\]
+
+And applying LLL we can find $r$.
+
+\chapter{ECDSA Cryptanalysis}
 
 \section{ECDSA Introduction}
 
@@ -698,7 +748,7 @@ Source of the method:
 
 %Boneh-Venkatesan1996_Chapter_HardnessOfComputingTheMostSign-1.pdf, HPL-1999-90-1.pdf, https://www.researchgate.net/publication/2406712_The_Insecurity_of_the_Elliptic_Curve_Digital_Signature_Algorithm_with_Partially_Known_Nonces
 
-\subsection{Recover $d$ from many signatures}
+\subsection{Recover $d$ from many signatures with small $k_i$}
 
 Suppose we have many signatures $(r_1, s_1), \ldots, (r_m, s_m)$ with message hashes $h_1, \ldots, h_m$. We can write the equivalence
 $s_i \equiv k_i^{-1}(h_i +  dr_i) \mod n$ for $i = 1,\ldots,m$ and we can remove $d$ as before to get
@@ -733,7 +783,7 @@ And create the lattice $B$ as
 
 Same as before this lattice contains $v = (-k_1, -k_2, \ldots, k_m, K)$ and with probability TODO we can find that vector after applying LLL.
 
-\subsection{Recover $d$ knowing MSB bits from each $k$}
+\subsection{Recover $d$ knowing MSB bits of each $k_i$}
 
 What if we know the firsts MSB bits of each $k_i$?
 
