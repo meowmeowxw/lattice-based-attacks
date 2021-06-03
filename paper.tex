@@ -88,7 +88,7 @@ Let $v_1,v_2,\ldots,v_k \in V$. A \textit{linear combination} of $v_1,v_2,\ldots
 \end{center}
 
 \begin{definition}
-    \textbf{Lineaer Independece}
+    \textbf{Linear Independece}
 \end{definition}
 
 A set of vectors $v_1,v_2,\ldots,v_k \in V$ is \textit{linearly independent} if the the only way to get
@@ -298,7 +298,7 @@ and \textbf{CVP}, for example \textbf{LLL}\cite{LLL} and \textbf{Babai's algorit
 
 \section{Introduction}
 
-The \textbf{Lenstra-Lenstra-Lovász} \textit{LLL} or \textit{$L^3$} is a polynomial time algorithm to find a "shorter" basis.
+The \textbf{Lenstra-Lenstra-Lovász} \textit{LLL}\cite{LLL} or \textit{$L^3$} is a polynomial time algorithm to find a ``short'' basis of a lattice.
 
 \begin{theorem}
     \textbf{LLL}
@@ -382,15 +382,13 @@ There are many applications of LLL
 
 \begin{enumerate}
     \item Factoring polynomials over the integers. For example, given $x^2 - 1$ factor it into $x + 1$ and $x - 1$.
-    \item Integer Programming. This is a well-known \textbf{NP}-complete problem. Using LLL, one can obtain a polynomial time solution
+    \item Integer Programming. This is a well-known $\mathcal{NP}$-complete problem. Using \textbf{LLL}, one can obtain a polynomial time solution
           to integer programming with a fixed number of variables.
     \item Approximation to the \textbf{CVP} or \textbf{SVP}, as well as other lattice problems.
-    \item Application in cryptanalysis.
+    \item Cryptanalysis (break cryptographic protocols).
 \end{enumerate}
 
 \chapter{RSA Cryptanalysis}
-
-% \section{Attack Knapsack}
 
 \section{RSA Introduction}
 
@@ -428,14 +426,17 @@ However there are different attacks against textbook RSA or bad implementations:
     \item If $m < N^{\frac{1}{e}}$, then $m^e < N$ and the modulo operation is not applied and we only need to find the $e$th root of $c$ over the
         integers to find $m$.
     \item If $q = p + x$ where $x$ is small enough than it's easy to recover the factors of $N$ computing $A = \sqrt{N}$ and compute
-            $p = A - x$ for different value of $x$ until $N \mod p = 0$, then we have found $q = N / p$
-    \item Many more attacks can be found TODO.
+            $p = A - x$ for different value of $x$ until $N \mod p = 0$, then we have found $q = N / p$.
+    \item If $d$ is too small (for example to accelerate decryption) then Wiener found a way to recover the private key $d$ \cite{wiener}.
+    \item Other attacks can be found on the excellent survey by Dan Boneh \cite{boneh99twentyyears}.
 \end{itemize}
 
 \section{Lattices against RSA}
 
-We want to attack a relaxed model of RSA where we know a part of the message $m$.
-We start introducing the \ref{TODO} coppersmith attack and the math behind it.
+We start introducing the main ideas of Coppersmith's attack \cite{coppersmith96} and the math behind it.
+The attack can be used against \textbf{RSA} when a small $e$ is used. In 2017 the attack was used to exploit
+\href{https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15361}{CVE-2017-15361} also named \textbf{ROCA}
+(Return Of Coppersmith's Attack) \cite{roca}.
 
 \subsection{Mathematical introduction}
 
@@ -502,37 +503,39 @@ We can easily create polynomials $p_i$ ($g_{i,j}$ and $h_i$)  sharing the same r
 Applying \textbf{LLL} to a lattice constructed by the coefficients of \ref{eq:create_pol} we'll find a short vector $v = g(xX)$ that will
 satisfy \ref{eq:pol}. If we then take $g(x)$ we will be able to compute the root over the integer.
 
-\subsection{Example}
+\subsection{Recover plaintext with known MSB bits of $m$}
 
-We have a 100-bit \textbf{RSA} modulus
+We will use a simplified version of the Coppersmith's attack that works when the root is approximately less than $N^{\frac{1}{6}}$.
+
+\textbf{Problem setup}. Let $N$ be an \textbf{RSA} modulus of $97$-bit:
 
 \begin{center}
-    $N=0xf046522fb555a90bdc558fc93$ and $e = 3$.
+    $N=\texttt{0x1a34992f64135aedaa0fe2bfd}$ and $e = 3$.
 \end{center}
 
 Before the encryption the message $m$ is padded as
 
 \[
-    z = pad || m = 0x74686973206b65793a || m
+    z = pad || m = \texttt{0xffffffffffffffffffffff} || m
 \]
 
-where $||$ is the concatenation. The padding is the ascii encoding of ``this key:''\\
+where $||$ is the concatenation.
 
 The ciphertext is
 
 \[
-    c = z^e \mod N = 0x5b603cda4b72100c6f25954fc
+    c = z^e \mod N = \texttt{0x11701d5479bcdef207cba6937}
 \]
 
 Suppose that we don't know the factorization of $N$ and we would like to know the message $m$.
-However we know the padding and that the length of $m < 2^{16}$.
+We know the padding and that the message $m$ is 2 bytes long, composed by only ascii letters, so $m < \texttt{0x7b7b}$.
 
 \vspace*{10px}
 
 Let's define
 
 \[
-a = 0x74686973206b65793a0000
+    a = \texttt{0xffffffffffffffffffffff0000}
 .\] 
 
 which is the known padding string that got encrypted.
@@ -543,14 +546,14 @@ Thus we have that $c = (a + m)^3 \mod N$, for an unkown small $m$.
 We can define $f(x) = (a + x)^3 - c$, and so we setup the problem to find a small root $m$ such that $f(m) \equiv 0 \mod N$
 
 \begin{align*}
-    f(x) = x^3 + 0x15d393c596142306bae0000x^2 + 0x1b53c5e184a49b39f9ad9eedbx\\
-    + 0x486a5d936fb568185c8ff0506
+    f(x) = x^3 + \texttt{0x17d7f55d0c9dc5851af54957c}x^2 + \texttt{0x3cf96fed2ea927527a2ed329}x\\
+    + \texttt{0x32882e547964b3bcf75d315e}
 \end{align*}
 
 \vspace*{10px}
 
 \textbf{Lattice contruction}. Let the coefficients of $f$ be $f(x) = x^3 + f_2x^2 + f_1x + f_0$
-and $X = 2^{16}$ be the upper bound of the size of the root $m$. We can construct the matrix
+and $X = \texttt{0x7b7b}$ be the upper bound of the size of the root $m$. We can construct the matrix
 
 \[
 B = 
@@ -572,8 +575,8 @@ integer linear combination of the vector of the lattice will keep the bound $X^i
 
 \[
     \begin{split}
-    v = (0x90843131bc53X^3 + 0x2736f60b1c7ba3294X^2, \\
-    -0x1bec331b20625341b6d73X, 0x47336b98335c143ac912ec9e)
+    v = (-\texttt{0xd55d67baf71d}X^3, \texttt{0x3cf3cca3200a58bf}X^2, \\
+    \texttt{0x3854d44211e80f248449}X, -\texttt{0xec93bf51cf766f7b9f1e5e6})
     \end{split}
 \]
 
@@ -581,8 +584,8 @@ We can construct the polynomial $g$ using the coefficients of $v$
 
 \[
     \begin{split}
-        g(x) = 0x90843131bc53x^3 + 0x2736f60b1c7ba3294x^2 \\
-        -0x1bec331b20625341b6d73x + 0x47336b98335c143ac912ec9e
+        g(x) = -\texttt{0xd55d67baf71d}x^3 +  \texttt{0x3cf3cca3200a58bf}x^2 \\
+        \texttt{0x3854d44211e80f248449}x -\texttt{0xec93bf51cf766f7b9f1e5e6}
     \end{split}
 \]
 
@@ -607,11 +610,12 @@ If we ignore the $2^{\frac{3}{4}}$ factor (remember that $n = 4$), then we need 
 
 \vspace*{10px}
 
-We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}$, if we solves for $X$ this will be satisfied when $X < (\frac{N}{16})^{\frac{1}{6}}$.
+We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}$, if we solves for $X$ this will be satisfied when
+$X < (\frac{N}{16})^{\frac{1}{6}}$. We can consider the $\sqrt{4}$ an error term to have $X < N^{\frac{1}{6}}$.
 With the numbers we have this inequality is verified, however even if the bound of the shortest vector is larger we still have some possibilities to
 find the correct root.
 
-If we compute the root of $g(x)$ over the integers we obtain $m = 0x6162$ which is the correct result.\\
+If we compute the root of $g(x)$ over the integers we obtain $m = \texttt{0x4142} = $ ``AB'' which is the correct result.\\
 
 This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the same construction will work if we want to find
 
@@ -622,7 +626,7 @@ This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the s
 \end{itemize}
 
 To compute bigger root a bigger lattice with more polynomials generated with \ref{eq:create_pol} is needed,
-this method is better described in TODO, but the principles are the same.
+this method is better described in \cite{may2011} and a detailed implementation in sagemath by David Wong is available \cite{wong2015}.
 
 \subsection{Factorize modulus with known MSB bits of $p$}
 
