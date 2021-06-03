@@ -53,7 +53,7 @@ algorithms as \textbf{LLL} \cite{LLL}.
 
 To introduce the mathematics of lattices a basic linear algebra background is needed, so the second chapter is a summary of the
 basics properties needed to understand it. We used as main resource ``An Introduction to Mathematical Cryptography''\cite{mathcrypto14} to
-explain them, but we also tried to gives some geometrically intuition behind some operations.
+explain them, but we also tried to gives some geometrical intuition behind some operations.
 
 Cryptographic protocol as \textbf{RSA} and \textbf{ECDSA} are considered secure, however there are various attacks against a
 relaxed-model of each of them, i.e., What if we know some bits of the secret key? What if we know a part of the message before the encryption?
@@ -181,6 +181,22 @@ The two bases have the property that Span$\{v_1,\ldots,v_i\}$ = Span$\{v_1^*,\ld
 \end{figure}
 
 If we take $v_1=(4, 1), v_2=(2, 3)$ as basis and apply gram schmidt we obtain $u_1=v_1=(4, 1), u_2=(-10/17, 40/17)$ as shown in \ref{fig:gram_schmidt}
+
+\begin{definition}
+    \textbf{Determinant}
+\end{definition}
+
+The \textit{determinant} of a square matrix is a function that satisfies the following properties:
+
+\begin{enumerate}
+    \item The determinant is linear in each row.
+    \item The determinant reverses sign if two rows are interchanged.
+    \item The determinant of the identity matrix is equal to 1.
+\end{enumerate}
+
+If the determinant of a matrix is $0$ then the matrix is called \textbf{singular} (without an inverse).\\
+
+Grant Sanderson created fantastic animations to understand the geometrical intuition behind the \textit{determinant}\cite{determinant}.
 
 \section{Lattices}
 
