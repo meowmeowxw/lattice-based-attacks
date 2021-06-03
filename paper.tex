@@ -166,6 +166,7 @@ If $\lVert v_i \rVert = 1$ for all $i$ then the basis is \textit{orthonormal}.
         $v_i^* = v_i - \sum_{j=1}^{i-1} \mu_{ij}v_j^*$ \;
     }
     \caption{Gram-Schmidt Algorithm}
+    \label{alg:gram_schmidt}
 \end{algorithm}
 
 Let $b = (v_1, \ldots, v_n)$, be a basis for a vector space $V \subset \R^m$. There is an algorithm to create an orthogonal basis
@@ -325,7 +326,35 @@ For higher dimensions however the LLL algorithm outputs only an approximation fo
 
 \section{Algorithm}
 
-TODO: Write algorithm and explain some steps
+\begin{algorithm}[H]
+    \vspace*{5px}
+    Input basis ${v_1, \ldots, v_n}$ \; \\
+    $k = 2$ \; \\
+    $v_1* = v_1$ \; \\
+    \While{$k \le n$}{
+        \For{$j = k -1$ \KwTo $1$ step $-1$} {
+            $v_k = v_k - \left\lfloor\mu_{k, j}\right\rceil \boldsymbol{v}_{j}$  [size-reduction] \;
+        }
+        \eIf{$\lVert v_k^* \rVert^2 \ge (\frac{3}{4} - \mu_{k, k-1}^2) \lVert v_{k-1}^2 \rVert$}{
+            $k = k + 1$ \;  [Lovàsz-condition]
+        }{
+            Swap $v_{k-1}$ and $v_k$ [swap-step] \; \\
+            $k = \max(k - 1, 2)$
+        }
+    }
+    Note: At each step, $v_1^*, \ldots, v_k^*$ is the orthogonalized set of vectors
+    obtained with the Gram-Schmidt \ref{alg:gram_schmidt}. \\
+    \vspace*{5px}
+    $\mu_{i,j}$ is the quantity $(v_i \cdots v_j^*) / \lVert v_j^* \rVert^2$. \\
+    Output reduced basis ${v_1, \ldots, v_n}$
+    \caption{LLL reduction algorithm}
+\end{algorithm}
+
+The running time of the algorithm is polynomial and executes the main loop no more than
+$\mathcal{O}(n^2\log n + n^2\log M)$ steps, where $M = max \lVert v_i \rVert$. \\
+
+Kelby Ludwig explains an intuition behind every steps of the algorithm \cite{lllintuition}, and Oded Regev
+gives a more rigorous explanation of the algorithm and the properties \cite{lllexplanation}.
 
 \section{Applications}
 
