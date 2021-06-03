@@ -5,8 +5,11 @@
 \usepackage{graphicx}
 \usepackage{subfigure}
 \usepackage{wrapfig}
-\usepackage{algorithm}% http://ctan.org/pkg/algorithms
-%\usepackage{algorithmicx}
+% \usepackage{algorithm}% http://ctan.org/pkg/algorithms
+% \usepackage[ruled,vlined]{algorithm2e}
+% \usepackage{algorithm}
+\usepackage[]{algorithm2e}
+\usepackage{algorithmic}
 \usepackage[utf8]{inputenc}
 \usepackage{fontenc}
 \usepackage{amsmath,stmaryrd,mathtools,algorithm}
@@ -153,8 +156,16 @@ An \textit{ortoghonal basis} for a vector space $V$ is a basis $v_1, \ldots, v_m
 
 If $\lVert v_i \rVert = 1$ for all $i$ then the basis is \textit{orthonormal}.
 
-\begin{algorithm}
-    \textbf{Gram-Schmidt Algorithm}
+\begin{algorithm}[H]
+    \vspace*{5px}
+    $v_1^* = v1$\;
+    \\
+    \For{$i \gets 2$ \KwTo $n$}{
+        $\mu_{ij} = v_i \cdot v_j^* / \lVert v_j^* \rVert ^ 2$ for $1 \le j < i$ \;
+        \\
+        $v_i^* = v_i - \sum_{j=1}^{i-1} \mu_{ij}v_j^*$ \;
+    }
+    \caption{Gram-Schmidt Algorithm}
 \end{algorithm}
 
 Let $b = (v_1, \ldots, v_n)$, be a basis for a vector space $V \subset \R^m$. There is an algorithm to create an orthogonal basis
@@ -207,24 +218,15 @@ a different basis.
     \end{minipage}
 \end{figure}
 
+\clearpage
+
 \section{Problems}
 
 \subsection{SVP}
 
 \textbf{The Shortest Vector Problem} (\texttt{SVP}): Find a nonzero vector $v \in L$ that minimez the Euclidean norm $\lVert v \rVert$.
 
-\begin{algorithm}
-    \caption{Gauss Basis Reduction}
-    \vspace*{5px}
-    \text{Loop} \\
-    If $\lVert v_2 \rVert < \lVert v_1 \rVert$ , \text{swap }$v_1, v_2$ \\
-    m = $\left \lceil{(v_1 \cdot v_2) {\lVert v_1 \rVert}^{-2}} \right \rceil$ \\
-    \text{If } $m = 0$, \text{return } $v_1, v_2$ \\
-    $v_2 = v_2 - mv_1$ \\
-    \text{Continue Loop}
-\end{algorithm}
-
-\begin{figure}[b]
+\begin{figure}[!b]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/gauss_svp.png}
     \caption{Gauss reduction}
@@ -234,10 +236,25 @@ a different basis.
 Gauss's developed an algorithm to find an optimal basis for a two-dimensional lattice given an arbitrary basis. The output of the algorithm
 gives the shortest nonzero vector in $L$ and in this way solves the \texttt{SVP}.
 
+\begin{algorithm}[H]
+    \vspace*{5px}
+    \While{true}{
+        \If{$\lVert v_2 \rVert < \lVert v_1 \rVert$}{
+            swap $v_1, v_2$ \;
+        }
+        m = $\left \lfloor{(v_1 \cdot v_2) {\lVert v_1 \rVert}^{-2}} \right \rfloor$ \\
+        \If{$m = 0$}{
+            return $v_1, v_2$ \;
+        }
+        $v_2 = v_2 - mv_1$ \\
+    }
+    \caption{Gauss Basis Reduction}
+\end{algorithm}
+
 If we take for example $v_1 = (8, 4), v_2 = (7, 5)$ and apply the gauss reduction algorithm we
 obtain $w_1 = (1, -1), w_2 = (6, 6)$ \ref{fig:gauss_svp}. $w_1$ is the shortest nonzero vector in the lattice $L$ spanned by $v_1, v_2$.
 
-However the bigger the dimension of the lattice, the harder is the problem and there isn't a polynomial algorithm to find such vector.
+The bigger the dimension of the lattice, the harder is the problem and there isn't a polynomial algorithm to find such vector.
 
 \subsection{CVP}
 
