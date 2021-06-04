@@ -64,7 +64,7 @@ def get_fast_prime(e, M):
             return p
 
 
-M = prod(Primes()[:40])
+M = prod(Primes()[:39])
 e = 0x10001
 p = get_fast_prime(e, M)
 q = get_fast_prime(e, M)

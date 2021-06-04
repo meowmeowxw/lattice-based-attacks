@@ -32,7 +32,7 @@
 \newcommand{\F}{\mathbb{F}}
 \newcommand{\dd}{\cdot}
 
-\title{Introduction to Lattices Attacks\\``Cryptography''}
+\title{Introduction to Lattice-based Attacks\\``Cryptography''}
  
 \author{Di Santi Giovanni}
 \date{\today}
@@ -374,11 +374,9 @@ The running time of the algorithm is polynomial and executes the main loop no mo
 $\mathcal{O}(n^2\log n + n^2\log M)$ steps, where $M = max \lVert v_i \rVert$. \\
 
 Kelby Ludwig explains an intuition behind every steps of the algorithm \cite{lllintuition}, and Oded Regev
-gives a more rigorous explanation of the algorithm and the properties \cite{lllexplanation}.
+gives a more rigorous explanation of the algorithm and the properties \cite{lllexplanation}.\\
 
-\section{Applications}
-
-There are many applications of LLL
+Some of the applications of the algorithm are the following:
 
 \begin{enumerate}
     \item Factoring polynomials over the integers. For example, given $x^2 - 1$ factor it into $x + 1$ and $x - 1$.
@@ -427,7 +425,7 @@ However there are different attacks against textbook RSA or bad implementations:
         integers to find $m$.
     \item If $q = p + x$ where $x$ is small enough than it's easy to recover the factors of $N$ computing $A = \sqrt{N}$ and compute
             $p = A - x$ for different value of $x$ until $N \mod p = 0$, then we have found $q = N / p$.
-    \item If $d$ is too small (for example to accelerate decryption) then Wiener found a way to recover the private key $d$ \cite{wiener}.
+    \item It's possible to recover $d$ if it is too small (for example to accelerate decryption) using the Wiener's attack \cite{wiener}.
     \item Other attacks can be found on the excellent survey by Dan Boneh \cite{boneh99twentyyears}.
 \end{itemize}
 
@@ -435,7 +433,7 @@ However there are different attacks against textbook RSA or bad implementations:
 
 We start introducing the main ideas of Coppersmith's attack \cite{coppersmith96} and the math behind it.
 The attack can be used against \textbf{RSA} when a small $e$ is used, but also
-to factorize the modulus. In 2017 the attack was used to exploit
+to factorize the modulus if some bits of $p$ or $q$ are known. In 2017 the attack was used to exploit
 \href{https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15361}{CVE-2017-15361} also named \textbf{ROCA}
 (Return Of Coppersmith's Attack) \cite{roca}.
 
@@ -670,9 +668,9 @@ and computes the roots over the integers to find $r$. We implemented the attack 
 of \texbtf{RSA}-$1024$ knowing the $160$ most significant bits of $p$. The attack can be expanded
 until $X < p^{\frac{1}{2}}$ with a bigger lattice.
 
-\subsection{Real World case study: ROCA}
+\subsection{Real world case study: ROCA}
 
-\textbf{ROCA}\cite{roca} is a vulnerability discovered in the 2017 in a software library \textit{RSALib} in the generation
+\textbf{ROCA}\cite{roca} is a vulnerability discovered in 2017 in a software library \textit{RSALib} in the generation
 of the public modulus for \textbf{RSA}. The attack is believed to affects millions of smart cards. The vulnerbality
 resides in the generation of prime numbers, since embedded devices don't have lots of computational resources a fast way
 was needed. Every prime generated has the following structure:
@@ -682,7 +680,7 @@ was needed. Every prime generated has the following structure:
     \label{eq:roca}
 \]
 
-Where $k, a$ are random values different for every prime (unkown), $g = 65537$ and $M$ is known and it's a \textit{primorial} number.
+Where $k, a$ are random values different for every prime (unkown), $g = 65537$ and $M$ it's a \textit{primorial} number.
 A \textit{primorial} number $M$ is the product of the the first $n$ successive primes 
 
 \[
@@ -705,7 +703,7 @@ for $a, b, k, l \in \Z$. It's equivalent to
 for some $c \in \Z$ since all the multiples of $kM$ or $lM$ are $0 \mod M$.
 
 It's possible to compute the discrete logarithm of $g^c \mod M$ since the size of $|M|$ is smooth with
-Pohlig-Hellman algorithm \cite{pohlig}. With $c$ we can set a bound to the value of $a$ since
+Pohlig-Hellman algorithm \cite{pohlig}. With $c$ we can set the bound to the value of $a$ since
 
 \[
     \frac{c}{2} \le a \le \frac{c + ord}{2}
@@ -731,9 +729,10 @@ The concept of the algorithm is the following:
             return $p$ \;
         }
     }
+    \caption{Exploit idea}
 \end{algorithm}
 
-In practice however the bound of $a$ is too big, so the authors found a way the problem to a smaller $M'$ since the
+In practice however the bound of $a$ is too big, so the authors found a way to move the same problem to a smaller $M'$ since the
 bitsize of $M$ are more than sufficient for making the attack works with Coppersmith's algorithm. Their optimization
 find a new $M'$ such that
 
@@ -743,7 +742,7 @@ find a new $M'$ such that
     \item Find a small order of $g \in \Z_M'$ to make $a'$ smaller.
 \end{itemize}
 
-We were able to reproduce the attack in sagemath against \textbf{RSA}-512, and we used as $M'$ the value
+We were able to reproduce the attack in sagemath against \textbf{RSA}-$512$, and we used as $M'$ the value
 that Bruno Produit \cite{rocaopt} made available in his thesis and David Wong's implementation of Coppersmith's attack \cite{wong2015}.
 
 \chapter{ECDSA Cryptanalysis}
@@ -753,7 +752,7 @@ that Bruno Produit \cite{rocaopt} made available in his thesis and David Wong's 
 \subsection{Algorithm}
 
 \textbf{ECDSA} is a variant of the Digital Signature Algorithm (\textbf{DSA}) which uses elliptic curve cryptography.
-To digitally sign a message we have 3 public parameters
+There are 3 public parameters:
 
 \begin{itemize}
     \item The elliptic curve \textbf{$E$}.
@@ -761,12 +760,12 @@ To digitally sign a message we have 3 public parameters
     \item The generator's order \textbf{$n$}.
 \end{itemize}
 
-We also need to create a private key $d \in [1, n-1]$ and public key $Q = dG$. To digitally \textbf{sign} a message $m$:
+We also need to create a private key $d \in [1, n-1]$ and public key $Q = dG$. To \textbf{sign} a message $m$:
 
 \begin{enumerate}
-    \item Compute $h = $ HASH$(m)$ where HASH is a cryptographic hash functions.
-    \item Select a random integer $k \in [1, n-1]$.
-    \item Calculate $P = kG = (x_1, y_1)$ and set $r = (x_1)$.
+    \item Compute $h = $ MSB(HASH$(m))$ where HASH is a cryptographic hash function, for example SHA-256, and MSB take the $n$ most significant bits.
+    \item Select a random integer $k \in [1, n-1]$ (nonce).
+    \item Calculate $P = kG = (x_1, y_1)$ and set $r = (x_1)$ if $x_1 \neq 0$, otherwise repeat the steps.
     \item Compute $s = k^{-1}(h + dr) \mod n$, if $s = 0$ repeat the steps.
     \item The signature is composed by $(r, s)$.
 \end{enumerate}
@@ -792,13 +791,19 @@ However as RSA there are lots of implementation attacks
     \item If the same $k$ is used to generate two different signatures it's possible to recover the secret key $d$. This was a real bug 
         discovered in the Playstation 3.
     \item It's possible to recover $d$ if the parameter $k$ is not generated with a cryptographically secure pseudo random generator.
-    \item If the elliptic curve used is not standardized (custom) then it's possible that the discrete logarithm is easily solvable.
+    \item If the elliptic curve used is not standardized (custom) then it's possible that the discrete logarithm is easily solvable
+        \cite{giuliani99attackson}, \cite{mov} \cite{smartass}.
 \end{itemize}
 
 \section{Lattices against ECDSA}
 
+The lattice-based attacks presented here are based on the \textit{Hidden Number Problem} introduced
+by Boneh and Venkatesan \cite{hnp} that was in a second moment generalized to prove that the most significan bits
+of $k$ can potentially leak the entire nonce \cite{ecdsa_nonce}.
+
 \subsection{Recover $d$ from a pair of signatures with small $k_1, k_2$}
 
+\textbf{Problem setup}.
 Let $p = \texttt{0xffffffffffffd21f}$ and let $E: y^2 = x^3 + 3$ be an elliptic curve over $\F_p$ with the generator
 $G = (\texttt{0xcc3b3d1a0c4938ef}, \texttt{0x4ab35ff66f8194fa})$ of order $n = \texttt{0xfffffffefa23f437}$.
 
@@ -950,7 +955,7 @@ And create the lattice $B$ as
 
 \vspace*{10px}
 
-Same as before this lattice contains $v = (-k_1, -k_2, \ldots, k_m, K)$ and with probability TODO we can find that vector after applying LLL.
+Same as before this lattice contains $v = (-k_1, -k_2, \ldots, k_m, K)$ that can be found using LLL.
 
 \subsection{Recover $d$ knowing MSB bits of each $k_i$}
 
@@ -975,8 +980,8 @@ And we can set $u_i' = a_i + t_ia_m + u_i$ to be the value inside the lattice \r
 
 is in the lattice and could be found using LLL. To recover the original $(k_1, \ldots, k_m)$ we must add to $v$ the vector $w = (a_1, \ldots, a_m)$.
 
-I was able to recover the nonces with the $10$ MSB bits known on the curve \texttt{secp256r1} given $100$ signatures, but it's also possible
-to recover the nonces with less known bits as shown in \href{https://eprint.iacr.org/2020/1540}{paper}.
+Without any optimization we were able to recover the nonces with the $10$ MSB bits known on the curve \texttt{secp256r1} given $100$ signatures,
+but it's also possible to recover the nonces with less known bits as shown in the results obtained by Albrecht and Heninger \cite{ecdsa_result}.
 
 \chapter*{Conclusion}
 
