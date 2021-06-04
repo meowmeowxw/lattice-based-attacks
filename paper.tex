@@ -237,7 +237,7 @@ a different basis.
 
 \clearpage
 
-\section{Problems}
+\section{Lattice Problems}
 
 \subsection{SVP}
 
@@ -434,7 +434,8 @@ However there are different attacks against textbook RSA or bad implementations:
 \section{Lattices against RSA}
 
 We start introducing the main ideas of Coppersmith's attack \cite{coppersmith96} and the math behind it.
-The attack can be used against \textbf{RSA} when a small $e$ is used. In 2017 the attack was used to exploit
+The attack can be used against \textbf{RSA} when a small $e$ is used, but also
+to factorize the modulus. In 2017 the attack was used to exploit
 \href{https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-15361}{CVE-2017-15361} also named \textbf{ROCA}
 (Return Of Coppersmith's Attack) \cite{roca}.
 
@@ -557,6 +558,7 @@ and $X = \texttt{0x7b7b}$ be the upper bound of the size of the root $m$. We can
 
 \[
 B = 
+\label{mat:lattice_rsa}
 \begin{pmatrix}
     X^3 & f_2X^2 & f_1X & f_0 \\
     0 & NX^2 & 0 & 0 \\
@@ -568,7 +570,7 @@ B =
 The rows of the matrix correspond to the coefficient vectors of the polynomials $f(x), Nx^2, Nx$ and $N$, furthermore we know
 that each polynomials will be 0 modulo $N$ if evaluated at $x = m$.
 We applied Howgrave-Graham with $m=1$ (the $N^m$ parameter not the message).\\
-With this lattice construction every vector is of the form $v = (v_1X^3, v_2X^2, v_1X, v_0)$, because any
+With this lattice construction every vector is of the form $v = (v_3X^3, v_2X^2, v_1X, v_0)$, because any
 integer linear combination of the vector of the lattice will keep the bound $X^i$ for $i=0,..,\dim(B)-1$.
 
 \textbf{Apply LLL}. We then apply LLL to find the shortest vector of the reduced basis:
@@ -630,11 +632,12 @@ this method is better described in \cite{may2011} and a detailed implementation 
 
 \subsection{Factorize modulus with known MSB bits of $p$}
 
-Knowing the most significat bits of $p$ can be used to factor the modulus $N$ ref TODO coppersmith.
-
+Lattices can also be used to factor a modulus $N$ knowing the most significant bits of one of the factor.
 Let $a = 2^lb$ where $b$ are the bits known of $p$, then $p = a + r$ for some small value of $r$.
+We can rewrite the problem to find the root $r$ of $f(x) = a + x \mod p$ such that $f(r) = p \equiv 0 \mod p$.
+Suppose that we know the bound of $r$ such that $|r| < X$ for some bound $X$.
 
-Using as lattice basis
+We can construct the following lattices
 
 \[
     B = 
@@ -645,7 +648,103 @@ Using as lattice basis
     \end{pmatrix} 
 \]
 
-And applying LLL we can find $r$.
+\vspace*{10px}
+
+Notice that the rows correspond to the polynomials $x(x + a)$, $(x + a)$, $N$ and that each of these polynomials will
+be $0 \mod p$ when $x = r$. As before \ref{mat:lattice_rsa}, every polynomial is scaled by $X$ which is the upperbound.
+
+We need to verify that the shortest vector that we can with \textbf{LLL} will be less than $p$ because if $g(x) < p$,
+then by construction we can compute $g(r) = 0$ over the integers.
+In this case we have
+
+\[
+    (detB)^{\frac{1}{\dim L}} = (X^3N)^{\frac{1}{3}} < p
+\]
+
+Solving for $X$ we obtain $X < p^{\frac{1}{3}}$, so this method works for every $|r| < p^{\frac{1}{3}}$.
+
+To find $r$ we just need to apply \textbf{LLL} and take the first vector (shortest) that will be of the form $v = (v_2X^2, v_1X, v_0)$.
+
+The last step is to construct $g(x) = v_2x^2 + v_1x + v_0$ (just divides every coefficient by $X^i$)
+and computes the roots over the integers to find $r$. We implemented the attack against a modulus
+of \texbtf{RSA}-$1024$ knowing the $160$ most significant bits of $p$. The attack can be expanded
+until $X < p^{\frac{1}{2}}$ with a bigger lattice.
+
+\subsection{Real World case study: ROCA}
+
+\textbf{ROCA}\cite{roca} is a vulnerability discovered in the 2017 in a software library \textit{RSALib} in the generation
+of the public modulus for \textbf{RSA}. The attack is believed to affects millions of smart cards. The vulnerbality
+resides in the generation of prime numbers, since embedded devices don't have lots of computational resources a fast way
+was needed. Every prime generated has the following structure:
+
+\[
+    p = kM + (g^a \mod M)
+    \label{eq:roca}
+\]
+
+Where $k, a$ are random values different for every prime (unkown), $g = 65537$ and $M$ is known and it's a \textit{primorial} number.
+A \textit{primorial} number $M$ is the product of the the first $n$ successive primes 
+
+\[
+    M = P_n# = \prod_{i=1}^{n} P_i
+\]
+
+where $n$ is related to key size. In the case of \textit{RSALib} the primorial number used had similar dimension to $p$,
+and the value $a, k$ didn't have much entropy. The modulus is
+
+\[
+    N = (kM + g^{a}\mod M)(lM + g^{b}\mod M)
+\]
+
+for $a, b, k, l \in \Z$. It's equivalent to
+
+\[
+    N \equiv g^{a + b} \equiv g^{c} \mod M
+\]
+
+for some $c \in \Z$ since all the multiples of $kM$ or $lM$ are $0 \mod M$.
+
+It's possible to compute the discrete logarithm of $g^c \mod M$ since the size of $|M|$ is smooth with
+Pohlig-Hellman algorithm \cite{pohlig}. With $c$ we can set a bound to the value of $a$ since
+
+\[
+    \frac{c}{2} \le a \le \frac{c + ord}{2}
+\]
+
+where $ord$ is the multiplicative order of the generator $g \in Z_M$.
+
+Once we know the bound of $a$ we can try to find the value of $k$ with the Coppersmith's method \cite{coppersmith96} for every possible $a$.
+
+The concept of the algorithm is the following:
+
+\begin{algorithm}[H]
+    \vspace*{5px}
+    \textbf{Input: } $N, M, g, ord, X$ \; \\
+    $c = \log_{g}N \mod M$ \;\\
+    \For{$a \gets (\frac{c}{2}, \frac{c + ord}{2})$}{
+        \vspace*{5px}
+        $f(x) = xM + (g^a \mod M)$ \; \\
+        $g(x) = \frac{1}{M}f(x)$ [make monic, the roots are the same] \; \\
+        $k = $ coppersmith($g(x), N, X$) [find k] \; \\ 
+        $p = kM + (g^a \mod M)$  [candidate] \; \\
+        \If{$N \mod p = 0$}{
+            return $p$ \;
+        }
+    }
+\end{algorithm}
+
+In practice however the bound of $a$ is too big, so the authors found a way the problem to a smaller $M'$ since the
+bitsize of $M$ are more than sufficient for making the attack works with Coppersmith's algorithm. Their optimization
+find a new $M'$ such that
+
+\begin{itemize}
+    \item $(p, q)$ are still of the form \ref{eq:roca}, so $M'$ must be a divisor of $M$.
+    \item Coppersmith's algorithm will find $k'$ for the correct guess of $a'$.
+    \item Find a small order of $g \in \Z_M'$ to make $a'$ smaller.
+\end{itemize}
+
+We were able to reproduce the attack in sagemath against \textbf{RSA}-512, and we used as $M'$ the value
+that Bruno Produit \cite{rocaopt} made available in his thesis and David Wong's implementation of Coppersmith's attack \cite{wong2015}.
 
 \chapter{ECDSA Cryptanalysis}
 
