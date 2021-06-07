@@ -32,7 +32,8 @@ m = 100
 messages = [f"message {i}".encode() for i in range(m)]
 
 exp = 256
-bits_known = 10
+# It works with 7 bits too most of the time
+bits_known = 8
 keys = [randrange(1, n) for _ in range(m)]
 h = [int.from_bytes(sha256(msg).digest()[:nl//8], "big") for msg in messages]
 a = [k & (sum(2^(exp - i) for i in range(bits_known))) for k in keys]

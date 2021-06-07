@@ -770,7 +770,7 @@ We also need to create a private key $d \in [1, n-1]$ and public key $Q = dG$. T
     \item The signature is composed by $(r, s)$.
 \end{enumerate}
 
-\vspace*{10px}
+\clearpage
 
 To \textbf{verify} the signature:
 
@@ -797,17 +797,20 @@ However as RSA there are lots of implementation attacks
 
 \section{Lattices against ECDSA}
 
-The lattice-based attacks presented here are based on the \textit{Hidden Number Problem} introduced
+The lattice-based attacks presented here are based on the \textit{HNP (Hidden Number Problem)} introduced
 by Boneh and Venkatesan \cite{hnp} that was in a second moment generalized to prove that the most significan bits
 of $k$ can potentially leak the entire nonce \cite{ecdsa_nonce}.
+In 2020 a group of researcher were able to leak the MSBs of \textit{DH} and \textit{DHE} secrets in \textbf{TLS $\le$ 1.2}
+and using a similar lattice constructions as the one we will describe to solve the \textit{HNP}
+and thus breaks the protocol \cite{cryptoeprint:2020:1151} (Raccoon Attack).
 
 \subsection{Recover $d$ from a pair of signatures with small $k_1, k_2$}
 
 \textbf{Problem setup}.
 Let $p = \texttt{0xffffffffffffd21f}$ and let $E: y^2 = x^3 + 3$ be an elliptic curve over $\F_p$ with the generator
-$G = (\texttt{0xcc3b3d1a0c4938ef}, \texttt{0x4ab35ff66f8194fa})$ of order $n = \texttt{0xfffffffefa23f437}$.
+$G = (\texttt{0xcc3b3d1a0c4938ef}, \\ \texttt{0x4ab35ff66f8194fa})$ of order $n = \texttt{0xfffffffefa23f437}$.
 
-\vspace*{10px}
+\clearpage
 
 We have two signature:
 
@@ -980,12 +983,22 @@ And we can set $u_i' = a_i + t_ia_m + u_i$ to be the value inside the lattice \r
 
 is in the lattice and could be found using LLL. To recover the original $(k_1, \ldots, k_m)$ we must add to $v$ the vector $w = (a_1, \ldots, a_m)$.
 
-Without any optimization we were able to recover the nonces with the $10$ MSB bits known on the curve \texttt{secp256r1} given $100$ signatures,
-but it's also possible to recover the nonces with less known bits as shown in the results obtained by Albrecht and Heninger \cite{ecdsa_result}.
+Without any optimization we were able to recover the nonces with the $8$ MSB bits known on the curve \texttt{secp256r1} given $100$ signatures 
+and with a probability bigger than $50\%$ with $7$ MSB bits known.
+
+It's possible to optimize the attack to recover the nonces with less known bits as shown in the results obtained by
+Albrecht and Heninger \cite{ecdsa_result}.
 
 \chapter*{Conclusion}
 
 The results obtained from the implementation of the attacks are satisfactory and can be used against real world practical cases.
+There is a fair amount of probability and heuristic to make the attacks works that isn't discussed in detail.
+As with other branch of mathematics not all theorems and properties are proved to be useful the moment they were first introduced
+but can become useful years later as the hidden number problem that become crucial for the Raccoon Attack.
+The study on how to exploit side-channel attacks (ex. knowing some bits of $p$ in \textbf{RSA}) has been proven useful
+with \textbf{ROCA}.
+The most used cryptographic protocol used has been proved secure but it's very easy to implement them wrong and side-channel
+vulnerabilities can heavily compromise the security of the protocol.
 
 \bibliographystyle{plain}
 
