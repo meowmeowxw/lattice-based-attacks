@@ -6,13 +6,13 @@
 \usepackage{subfigure}
 \usepackage{wrapfig}
 % \usepackage{algorithm}% http://ctan.org/pkg/algorithms
-% \usepackage[ruled,vlined]{algorithm2e}
+% \usepackage[ruled, vlined]{algorithm2e}
 % \usepackage{algorithm}
 \usepackage[]{algorithm2e}
 \usepackage{algorithmic}
 \usepackage[utf8]{inputenc}
 \usepackage{fontenc}
-\usepackage{amsmath,stmaryrd,mathtools,algorithm}
+\usepackage{amsmath, stmaryrd, mathtools, algorithm}
 \usepackage{amssymb}
 %\usepackage{amsfonts}
 \usepackage{float}
@@ -53,7 +53,7 @@ algorithms as \textbf{LLL} \cite{LLL}.
 
 To introduce the mathematics of lattices a basic linear algebra background is needed, so the second chapter is a summary of the
 basics properties needed to understand it. We used as main resource ``An Introduction to Mathematical Cryptography''\cite{mathcrypto14} to
-explain them, but we also tried to gives some geometrical intuition behind some operations.
+explain them, but we also tried to give some geometrical intuition behind some operations.
 
 Cryptographic protocol as \textbf{RSA} and \textbf{ECDSA} are considered secure, however there are various attacks against a
 relaxed-model of each of them, i.e., What if we know some bits of the secret key? What if we know a part of the message before the encryption?
@@ -81,7 +81,7 @@ A \textit{vector space} $V$ is a subset of $\R^{m}$ which is closed under finite
     \textbf{Linear Combinations}
 \end{definition}
 
-Let $v_1,v_2,\ldots,v_k \in V$. A \textit{linear combination} of $v_1,v_2,\ldots,v_k \in V$ is any vector of the form
+Let $v_1,v_2,\ldots,v_k \in V$. A \textit{linear combination} of $v_1,v_2,\ldots,v_k \in V$ is any vector of the form:
 
 \begin{center}
     $\alpha_1v_1 + \alpha_2v_2 + \cdots + \alpha_kv_k$ with $\alpha_1, \ldots, \alpha_k \in \R$
@@ -217,7 +217,7 @@ called \textit{Integral Lattice}.
 On the figure \ref{fig:lattice0} we show a lattice $L$ with bases $v=(3, 1)$ and $w=(-1, 1)$, and on \ref{fig:lattice1} the same lattice $L$ with
 a different basis.
 
-\begin{figure}[!tbp]
+\begin{figure}[!bp]
     \begin{minipage}[b]{0.50\textwidth}
         \includegraphics[width=\textwidth]{./img/lattice_b0.png}
         \caption{Lattice $L$ spanned by $v, w$}
@@ -285,7 +285,7 @@ The bigger the dimension of the lattice, the harder is the problem and there isn
     \label{fig:cvp}
 \end{figure}
 
-\texbtf{Example}. Let $L$ a lattice spanned by $v_1 = (0, 1), v_2 = (2, 0)$, and a target vector $t = (2.3, 2.4)$. The closest vector
+\textbf{Example}. Let $L$ a lattice spanned by $v_1 = (0, 1), v_2 = (2, 0)$, and a target vector $t = (2.3, 2.4)$. The closest vector
 to $t$ in the lattice $L$ is $w = (2, 2)$.\\
 
 Both \textbf{CVP} and \textbf{SVP} are $\mathcal{NP}$-hard problems, thus the complexity of the problem increments with the dimension
@@ -373,10 +373,10 @@ For higher dimensions however the LLL algorithm outputs only an approximation fo
 The running time of the algorithm is polynomial and executes the main loop no more than
 $\mathcal{O}(n^2\log n + n^2\log M)$ steps, where $M = max \lVert v_i \rVert$. \\
 
-Kelby Ludwig explains an intuition behind every steps of the algorithm \cite{lllintuition}, and Oded Regev
+Kelby Ludwig explains an intuition behind every step of the algorithm \cite{lllintuition}, and Oded Regev
 gives a more rigorous explanation of the algorithm and the properties \cite{lllexplanation}.\\
 
-Some of the applications of the algorithm are the following:
+Some applications of the algorithm are the following:
 
 \begin{enumerate}
     \item Factoring polynomials over the integers. For example, given $x^2 - 1$ factor it into $x + 1$ and $x - 1$.
@@ -397,7 +397,7 @@ The usual step to generate a public/private key for \textbf{RSA} is the followin
 
 \begin{enumerate}
     \item Fix $e = 65537$ or $e = 3$ (public).
-    \item Find two primes $p, q$ such that $p - 1$ and $q - 1$ are relatively prime to $e$, i.e. gcd$(e, p-1) = 1$ and gcd$(e, q-1) = 1$.
+    \item Find two primes $p, q$ such that $p - 1$ and $q - 1$ are relatively prime to $e$, gcd$(e, p-1) = 1$ and gcd$(e, q-1) = 1$.
     \item Compute $N = p * q$ and $\phi(n) = (p-1) * (q-1)$
     \item Calculate $d$ (private) as the multiplicative inverse of $e$ modulo $\phi(n)$.
     \item $(N, e)$ is the public key, $(N, d)$ is the private key.
@@ -417,15 +417,15 @@ To decrypt a ciphertext $c$
 
 \subsection{Security}
 
-RSA relies on the hardness of factoring the modulo $N$ and we don't have a polynomial algorithm to factor it, so it's considered secure.
-However there are different attacks against textbook RSA or bad implementations:
+RSA relies on the hardness of factoring the modulo $N$, and we don't have a polynomial algorithm to factor it, so it's considered secure.
+However, there are different attacks against textbook RSA or bad implementations:
 
 \begin{itemize}
     \item If $m < N^{\frac{1}{e}}$, then $m^e < N$ and the modulo operation is not applied and we only need to find the $e$th root of $c$ over the
         integers to find $m$.
     \item If $q = p + x$ where $x$ is small enough than it's easy to recover the factors of $N$ computing $A = \sqrt{N}$ and compute
             $p = A - x$ for different value of $x$ until $N \mod p = 0$, then we have found $q = N / p$.
-    \item It's possible to recover $d$ if it is too small (for example to accelerate decryption) using the Wiener's attack \cite{wiener}.
+    \item It's possible to recover $d$ if it is too small (in practice could be used to accelerate decryption) using the Wiener's attack \cite{wiener}.
     \item Other attacks can be found on the excellent survey by Dan Boneh \cite{boneh99twentyyears}.
 \end{itemize}
 
@@ -445,7 +445,7 @@ It's easy to find the roots of a univariate polynomial over the integers. Findin
     $f(x) \equiv 0 \mod N$
 \end{center}
 
-Suppose $N$ is an \textbf{RSA} modulus and we don't know the factorization of it. Let's have an univariate integer polynomial $f(x)$ with degree $n$
+Suppose $N$ is an \textbf{RSA} modulus, and we don't know the factorization of it. Let's have an univariate integer polynomial $f(x)$ with degree $n$
 
 \begin{center}
     $f(x) = x^n + a_{n-1}x^{n-1} + a_{n-2}x^{n-2} + \cdots + a_1n + a_0$
@@ -453,6 +453,8 @@ Suppose $N$ is an \textbf{RSA} modulus and we don't know the factorization of it
 
 Coppersmith showed how we can recover the value $x_0$ such that $f(x_0) \equiv 0 \mod N$, with $x_0 < N^{\frac{1}{n}}$ in polynomial time
 using the following theorem
+
+\clearpage
 
 \begin{theorem}
     \textbf{Howgrave-Graham}
@@ -486,7 +488,7 @@ The \textbf{LLL} algorithm is fundamental because:
     \item It only does \textbf{integer linear operations} on the basis vectors.
         In this way even if the basis is different it's only a linear combination of vector that still have $x_0$ as root
         modulo $N^m$.
-    \item If we craft the lattice properly, the norm of shortest vector on the reduced basis will satisfy \ref{eq:pol}.
+    \item If we craft the lattice properly, the norm of the shortest vector on the reduced basis will satisfy \ref{eq:pol}.
         We know the length's bound of the shortest vector that LLL could find.
 \end{itemize}
 
@@ -526,7 +528,7 @@ The ciphertext is
     c = z^e \mod N = \texttt{0x11701d5479bcdef207cba6937}
 \]
 
-Suppose that we don't know the factorization of $N$ and we would like to know the message $m$.
+Suppose that we don't know the factorization of $N$, and we would like to know the message $m$.
 We know the padding and that the message $m$ is 2 bytes long, composed by only ascii letters, so $m < \texttt{0x7b7b}$.
 
 \vspace*{10px}
@@ -541,8 +543,8 @@ which is the known padding string that got encrypted.
 
 \vspace*{10px}
 
-Thus we have that $c = (a + m)^3 \mod N$, for an unkown small $m$.
-We can define $f(x) = (a + x)^3 - c$, and so we setup the problem to find a small root $m$ such that $f(m) \equiv 0 \mod N$
+Thus, we have that $c = (a + m)^3 \mod N$, for an unkown small $m$.
+We can define $f(x) = (a + x)^3 - c$, and setup the problem to find a small root $m$ such that $f(m) \equiv 0 \mod N$
 
 \begin{align*}
     f(x) = x^3 + \texttt{0x17d7f55d0c9dc5851af54957c}x^2 + \texttt{0x3cf96fed2ea927527a2ed329}x\\
@@ -566,10 +568,10 @@ B =
 \] 
 
 The rows of the matrix correspond to the coefficient vectors of the polynomials $f(x), Nx^2, Nx$ and $N$, furthermore we know
-that each polynomials will be 0 modulo $N$ if evaluated at $x = m$.
+that each polynomial will be 0 modulo $N$ if evaluated at $x = m$.
 We applied Howgrave-Graham with $m=1$ (the $N^m$ parameter not the message).\\
 With this lattice construction every vector is of the form $v = (v_3X^3, v_2X^2, v_1X, v_0)$, because any
-integer linear combination of the vector of the lattice will keep the bound $X^i$ for $i=0,..,\dim(B)-1$.
+integer linear combination of the vector of the lattice will keep the bound $X^i$ for $i=\dim(B)-1,..,0$.
 
 \textbf{Apply LLL}. We then apply LLL to find the shortest vector of the reduced basis:
 
@@ -610,12 +612,12 @@ If we ignore the $2^{\frac{3}{4}}$ factor (remember that $n = 4$), then we need 
 
 \vspace*{10px}
 
-We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}$, if we solves for $X$ this will be satisfied when
+We have $(\det B)^{\frac{1}{4}} = (X^6N^3)^{\frac{1}{4}} < \frac{N}{\sqrt{4}}$, if we solve for $X$ this will be satisfied when
 $X < (\frac{N}{16})^{\frac{1}{6}}$. We can consider the $\sqrt{4}$ an error term to have $X < N^{\frac{1}{6}}$.
 With the numbers we have this inequality is verified, however even if the bound of the shortest vector is larger we still have some possibilities to
 find the correct root.
 
-If we compute the root of $g(x)$ over the integers we obtain $m = \texttt{0x4142} = $ ``AB'' which is the correct result.\\
+Computing the root of $g(x)$ over the integers we obtain $m = \texttt{0x4142} = $ ``AB'' which is the correct result.\\
 
 This specific lattice works to find roots up to size $N^{\frac{1}{6}}$, so the same construction will work if we want to find
 
@@ -651,7 +653,7 @@ We can construct the following lattices
 Notice that the rows correspond to the polynomials $x(x + a)$, $(x + a)$, $N$ and that each of these polynomials will
 be $0 \mod p$ when $x = r$. As before \ref{mat:lattice_rsa}, every polynomial is scaled by $X$ which is the upperbound.
 
-We need to verify that the shortest vector that we can with \textbf{LLL} will be less than $p$ because if $g(x) < p$,
+We need to verify that the shortest vector that we can find with \textbf{LLL} will be less than $p$ because if $g(x) < p$,
 then by construction we can compute $g(r) = 0$ over the integers.
 In this case we have
 
@@ -665,13 +667,13 @@ To find $r$ we just need to apply \textbf{LLL} and take the first vector (shorte
 
 The last step is to construct $g(x) = v_2x^2 + v_1x + v_0$ (just divides every coefficient by $X^i$)
 and computes the roots over the integers to find $r$. We implemented the attack against a modulus
-of \texbtf{RSA}-$1024$ knowing the $160$ most significant bits of $p$. The attack can be expanded
+of \textbf{RSA}-$1024$ knowing the $160$ most significant bits of $p$. The attack can be expanded
 until $X < p^{\frac{1}{2}}$ with a bigger lattice.
 
 \subsection{Real world case study: ROCA}
 
 \textbf{ROCA}\cite{roca} is a vulnerability discovered in 2017 in a software library \textit{RSALib} in the generation
-of the public modulus for \textbf{RSA}. The attack is believed to affects millions of smart cards. The vulnerbality
+of the public modulus for \textbf{RSA}. The attack is believed to affect millions of smart cards. The vulnerbality
 resides in the generation of prime numbers, since embedded devices don't have lots of computational resources a fast way
 was needed. Every prime generated has the following structure:
 
@@ -681,10 +683,10 @@ was needed. Every prime generated has the following structure:
 \]
 
 Where $k, a$ are random values different for every prime (unkown), $g = 65537$ and $M$ it's a \textit{primorial} number.
-A \textit{primorial} number $M$ is the product of the the first $n$ successive primes 
+A \textit{primorial} number $M$ is the product of the first $n$ successive primes 
 
 \[
-    M = P_n# = \prod_{i=1}^{n} P_i
+    M = P_n\# = \prod_{i=1}^{n} P_i
 \]
 
 where $n$ is related to key size. In the case of \textit{RSALib} the primorial number used had similar dimension to $p$,
@@ -785,7 +787,7 @@ To \textbf{verify} the signature:
 
 The security of \textbf{ECDSA} depends on the discrete logarithm problem.
 Given the points $Q, G$ such that $Q = k*G$ it's considered an hard problem to find $k$.
-However as RSA there are lots of implementation attacks
+However, as RSA, there are lots of implementation attacks
 
 \begin{itemize}
     \item If the same $k$ is used to generate two different signatures it's possible to recover the secret key $d$. This was a real bug 
@@ -798,11 +800,11 @@ However as RSA there are lots of implementation attacks
 \section{Lattices against ECDSA}
 
 The lattice-based attacks presented here are based on the \textit{HNP (Hidden Number Problem)} introduced
-by Boneh and Venkatesan \cite{hnp} that was in a second moment generalized to prove that the most significan bits
+by Boneh and Venkatesan \cite{hnp} that was in a second moment generalized to prove that the most significant bits
 of $k$ can potentially leak the entire nonce \cite{ecdsa_nonce}.
 In 2020 a group of researcher were able to leak the MSBs of \textit{DH} and \textit{DHE} secrets in \textbf{TLS $\le$ 1.2}
-and using a similar lattice constructions as the one we will describe to solve the \textit{HNP}
-and thus breaks the protocol \cite{cryptoeprint:2020:1151} (Raccoon Attack).
+and used a similar lattice constructions as the one we will describe to solve the \textit{HNP}
+and thus break the protocol \cite{cryptoeprint:2020:1151} (Raccoon Attack).
 
 \subsection{Recover $d$ from a pair of signatures with small $k_1, k_2$}
 
@@ -921,8 +923,6 @@ To retrieve $d$ we just need to compute
     d = r_1^{-1}(k_1s_1 - h_1) = \texttt{0xf00e5fb275bfd304}
 \]
 
-Source of the method:
-
 %Boneh-Venkatesan1996_Chapter_HardnessOfComputingTheMostSign-1.pdf, HPL-1999-90-1.pdf, https://www.researchgate.net/publication/2406712_The_Insecurity_of_the_Elliptic_Curve_Digital_Signature_Algorithm_with_Partially_Known_Nonces
 
 \subsection{Recover $d$ from many signatures with small $k_i$}
@@ -998,7 +998,7 @@ but can become useful years later as the hidden number problem that become cruci
 The study on how to exploit side-channel attacks (ex. knowing some bits of $p$ in \textbf{RSA}) has been proven useful
 with \textbf{ROCA}.
 The most used cryptographic protocol used has been proved secure but it's very easy to implement them wrong and side-channel
-vulnerabilities can heavily compromise the security of the protocol.
+vulnerabilities can heavily compromise the security of the protocols.
 
 \bibliographystyle{plain}
 
