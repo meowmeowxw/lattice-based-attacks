@@ -1,8 +1,8 @@
 # Introduction to Lattice-based Attacks
 
-In this [report](./lattice_based_attacks.pdf) I analyzed various attacks on RSA and ECDSA based on lattices.
+In the [essay](./lattice_based_attacks.pdf) different attacks on RSA and ECDSA based on lattice reduction algorithms are discussed.
 
-The attacks implemented in sagemath are the following
+The attacks implemented in SageMath are:
 
 | Script | Description|
 | --- | --- |
@@ -13,6 +13,5 @@ The attacks implemented in sagemath are the following
 | [attack_ecdsa](./src/attack_ecdsa.sage) | Implement ECDSA attacks when the nonces are small |
 | [attack_ecdsa_msb](./src/attack_ecdsa_msb.sage) | Recover ECDSA nonces when MSB bits of nonces are known against secp256r1 |
 
-During the writing of the report I also created some scripts to plot lattices and
-reduction algorithms that can be found in [src](./src)
+I also created some scripts to plot lattices and reduction algorithms that can be found in [src](./src).
 
